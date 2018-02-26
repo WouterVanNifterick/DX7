@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{2D13A5A2-FC05-4D55-AD1F-3C048B6F50C4}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="DX7VCL.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\FM\DX7FMX.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\Dexed\Dexed.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="DX7VCL">
+        <MSBuild Projects="DX7VCL.dproj"/>
+    </Target>
+    <Target Name="DX7VCL:Clean">
+        <MSBuild Projects="DX7VCL.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="DX7VCL:Make">
+        <MSBuild Projects="DX7VCL.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="DX7FMX">
+        <MSBuild Projects="..\FM\DX7FMX.dproj"/>
+    </Target>
+    <Target Name="DX7FMX:Clean">
+        <MSBuild Projects="..\FM\DX7FMX.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="DX7FMX:Make">
+        <MSBuild Projects="..\FM\DX7FMX.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Dexed">
+        <MSBuild Projects="..\Dexed\Dexed.dproj"/>
+    </Target>
+    <Target Name="Dexed:Clean">
+        <MSBuild Projects="..\Dexed\Dexed.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Dexed:Make">
+        <MSBuild Projects="..\Dexed\Dexed.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="DX7VCL;DX7FMX;Dexed"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="DX7VCL:Clean;DX7FMX:Clean;Dexed:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="DX7VCL:Make;DX7FMX:Make;Dexed:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

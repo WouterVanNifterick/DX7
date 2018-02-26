@@ -1,0 +1,72 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{601AA9A1-A54F-42D4-BA11-93CAE9B33F57}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="DX7VCL.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\SoundGen\SoundGen3.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Z:\Prog32\Embarcadero\Studio\18.0\bin\FMSynth.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\PrintAlgorithms.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="DX7VCL">
+        <MSBuild Projects="DX7VCL.dproj"/>
+    </Target>
+    <Target Name="DX7VCL:Clean">
+        <MSBuild Projects="DX7VCL.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="DX7VCL:Make">
+        <MSBuild Projects="DX7VCL.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="SoundGen3">
+        <MSBuild Projects="..\SoundGen\SoundGen3.dproj"/>
+    </Target>
+    <Target Name="SoundGen3:Clean">
+        <MSBuild Projects="..\SoundGen\SoundGen3.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SoundGen3:Make">
+        <MSBuild Projects="..\SoundGen\SoundGen3.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="FMSynth">
+        <MSBuild Projects="Z:\Prog32\Embarcadero\Studio\18.0\bin\FMSynth.dproj"/>
+    </Target>
+    <Target Name="FMSynth:Clean">
+        <MSBuild Projects="Z:\Prog32\Embarcadero\Studio\18.0\bin\FMSynth.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FMSynth:Make">
+        <MSBuild Projects="Z:\Prog32\Embarcadero\Studio\18.0\bin\FMSynth.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="PrintAlgorithms">
+        <MSBuild Projects="..\PrintAlgorithms.dproj"/>
+    </Target>
+    <Target Name="PrintAlgorithms:Clean">
+        <MSBuild Projects="..\PrintAlgorithms.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="PrintAlgorithms:Make">
+        <MSBuild Projects="..\PrintAlgorithms.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="DX7VCL;SoundGen3;FMSynth;PrintAlgorithms"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="DX7VCL:Clean;SoundGen3:Clean;FMSynth:Clean;PrintAlgorithms:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="DX7VCL:Make;SoundGen3:Make;FMSynth:Make;PrintAlgorithms:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

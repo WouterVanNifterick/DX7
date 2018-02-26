@@ -64,3 +64,13 @@ __recovery/
 
 # Castalia statistics file (since XE7 Castalia is distributed with Delphi)
 *.stat
+
+# project specific
+Zit werkende versie bij/
+Patches/Yasuhiko Fukuda/DX7Yasuhiko Fukuda.URL
+*.VBk
+*.mid
+Patches/Original Yamaha/DX7 VRC Cartridges/VRC-101/VRC-101.mp3
+*.txt
+Patches/!Instruments/Keyboard/Piano/Electric Piano/Wurlitzer/TX802WUR.LIT
+*.DOC
