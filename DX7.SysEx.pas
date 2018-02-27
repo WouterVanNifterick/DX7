@@ -5,7 +5,6 @@ interface
 uses
   DX7.Config,
   DX7.Voice,
-//  DX7.Params,
   Midi,
   FS1R.Params;
 
@@ -90,6 +89,7 @@ begin
     Move(voiceData[oscStart], oscData[0], oscEnd - oscStart);
 
     op := @p.operators[i];
+    op^ := default(TFS1ROperator);
     for j := 0 to 3 do
     begin
       if not InRange(oscData[0+j], low(op.Voiced.EG.Envelope.Rates[j]), high(op.Voiced.EG.Envelope.Rates[j])) then
@@ -113,7 +113,12 @@ begin
     op.Voiced.LevelScaling.Breakpoint := TBreakPoint(oscData[8]);
     op.Voiced.LevelScaling.LeftDpt    := oscData[9];
     op.Voiced.LevelScaling.RightDpt   := oscData[10];
+    if not InRange(oscData[11] and 3, 0, 3) then
+      Exit(False);
     op.Voiced.LevelScaling.LeftCurve  := TCurve( oscData[11] and 3 );
+
+    if not InRange(oscData[11] shr 2 and 3, 0, 3) then
+      Exit(False);
     op.Voiced.LevelScaling.RightCurve := TCurve( oscData[11] shr 2 );
 
     op.Voiced.EG.TimeScale := oscData[12] and 7; // rate?

@@ -4,9 +4,10 @@ interface
 
 uses
   SysUtils,
+  System.Math,
+  System.StrUtils,
   Generics.Collections,
   Generics.Defaults,
-  Math,
   Midi,
   WvN.Math.Bits;
 
@@ -494,6 +495,10 @@ TOscTranspose=$00..$30;
 /// </summary>
 TOscModeVoiced=(Ratio,Fixed);
 
+const
+  COscModeVoicedStr : array[TOscModeVoiced] of string=('Ratio','Fixed');
+
+type
 /// <summary>
 /// When “normal” is selected the operator frequency is determined by the
 /// F.Coarse and Freq Fine parameters, below.
@@ -779,6 +784,7 @@ TVoiceParams =
     fbRatio:double;
     procedure SetBankName(const b:string);
     function GetOpsCount:integer;
+    function ToString:string;
   end;
 
 TParamsBank=class(TList<TVoiceParams>)
@@ -986,6 +992,96 @@ begin
 
 //  Self.Osc.KeySync := Sysex.KeySynTransp
 end;
+
+
+function TVoiceParams.ToString;
+var
+  sb:TStringBuilder;
+  o,i:integer;
+  op:^TFS1ROperator;
+  f:ShortString;
+begin
+  sb := TStringBuilder.Create;
+  sb.Append('Name       : '); sb.Append(string(Common.Name).Trim);  sb.AppendLine;
+  sb.Append('Alg        : '); sb.Append(1+Common.Algorithm);  sb.AppendLine;
+  sb.Append('Transpose  : '); sb.Append(Common.NoteShift );  sb.AppendLine;
+//  sb.Append('Aftertouch : '); sb.Append(ifthen(Common. ,'On','Off')); sb.AppendLine;
+  sb.Append('FeedbackLvl: '); sb.Append(Common.FeedBack); sb.AppendLine;
+
+
+  sb.AppendLine;
+
+  sb.Append('Op Mode Freq  D ');
+  // header
+  for I := 0 to 3 do
+  begin
+    sb.Append(format('R%d L%d ',[i, i]));
+  end;
+  sb.Append('OL V A BP');
+  sb.Append(sLineBreak);
+
+  // osc
+  for o := 5 downto 0 do
+  begin
+    op := @Operators[o];
+//    op.UpdateFreq;
+
+    sb.AppendFormat('%d: ',[6-o]);
+//    sb.AppendFormat('[%s] ',[ifthen(op.enabled,'x',' ')]);
+
+    sb.Append(COscModeVoicedStr[op.Voiced.Osc.OscMode]+' ');
+
+//    case op.oscMode of
+//      Coarse: str(op.freqRatio:7:2,f);
+//      Fixed : str(op.freqFixed:7:2,f);
+//    end;
+    sb.Append(f); sb.append(' ');
+
+    sb.AppendFormat('%s%d ',[
+
+      ifthen(op.Voiced.Osc.FrDetune -7 < 0,'-',
+      ifthen(op.Voiced.Osc.FrDetune     =0,' ','+')),
+
+      abs(op.Voiced.Osc.FrDetune)]);
+
+
+     for I := 0 to 3 do
+     begin
+       sb.AppendFormat('%0.02d ',[ op.Voiced.EG.Envelope.Rates[i] ]);
+       sb.AppendFormat('%0.02d ',[ op.Voiced.EG.Envelope.Levels[i] ]);
+     end;
+
+
+     sb.AppendFormat('%0.02d ',[ op.Voiced.Volume ]);
+//   sb.AppendFormat('%g ',[ op.outputLevel ]);
+     sb.AppendFormat('%d ',[ op.Voiced.Sensitivity.AmpVelSense ]);
+     sb.AppendFormat('%d ',[ op.Voiced.Sensitivity.FreqModSense ]);
+
+     sb.AppendFormat('%s%d ',[Notes[ord(op.Voiced.LevelScaling.BreakPoint) mod 12] , ord(op.Voiced.LevelScaling.BreakPoint) div 12  ]);
+     sb.AppendFormat('%0.02d ',[ op.Voiced.LevelScaling.LeftDpt ]);
+     sb.AppendFormat('%0.02d ',[ op.Voiced.LevelScaling.RightDpt ]);
+//     sb.AppendFormat('%s ',[ Curves[op.Voiced.LevelScaling.LeftCurve] ]);
+//     sb.AppendFormat('%s ',[ Curves[op.Voiced.LevelScaling.RightCurve] ]);
+//     sb.AppendFormat('%d ',[ op.keyScaleRate ]);
+
+
+     sb.Append(sLineBreak)
+  end;
+
+
+  sb.Append('                ');
+  for I := 0 to 3 do
+  begin
+    sb.AppendFormat('%0.02d ',[
+      self.Common.PitchEG.Envelope.Rates[i],
+      self.Common.PitchEG.Envelope.Levels[I]
+      ]);
+  end;
+  sb.Append(sLineBreak);
+
+  Result := sb.ToString;
+end;
+
 
 
 end.

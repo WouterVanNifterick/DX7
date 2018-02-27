@@ -323,8 +323,6 @@ begin
 end;
 
 procedure TfrmMain.LoadAllPatches(Sender: TObject);
-var
-  p:TVoiceParams;
 begin
   AllPatches := TParamsBank.Create;
   VisiblePatches := TParamsBank.Create;
@@ -438,6 +436,8 @@ begin
   Feedback.Position   := Synth.params.Common.FeedBack;
   for f in TArray<TFrame1>.Create(Frame11, Frame12, Frame13, Frame14, Frame15, Frame16) do
     f.ParamsToGui(Synth.params.Operators[f.Tag - 1].Voiced);
+
+  Memo1.Text := Synth.params.ToString;
 end;
 
 function TfrmMain.KeyToNote(Key: Word):integer;

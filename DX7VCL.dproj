@@ -95,8 +95,8 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RangeChecking>true</DCC_RangeChecking>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.190;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <VerInfo_Build>190</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.209;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>209</VerInfo_Build>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <AppEnableHighDPI>true</AppEnableHighDPI>
@@ -135,7 +135,6 @@
         <DCCReference Include="DX7.LFO.pas"/>
         <DCCReference Include="DX7.Op.pas"/>
         <DCCReference Include="DX7.Voice.pas"/>
-        <DCCReference Include="DX7.Params.pas"/>
         <DCCReference Include="DX7.Synth.pas"/>
         <DCCReference Include="DX7.SysEx.pas"/>
         <DCCReference Include="Midi.pas"/>

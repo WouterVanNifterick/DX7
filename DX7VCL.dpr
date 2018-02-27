@@ -8,7 +8,6 @@ uses
   DX7.LFO in 'DX7.LFO.pas',
   DX7.Op in 'DX7.Op.pas',
   DX7.Voice in 'DX7.Voice.pas',
-  DX7.Params in 'DX7.Params.pas',
   DX7.Synth in 'DX7.Synth.pas',
   DX7.SysEx in 'DX7.SysEx.pas',
   Midi in 'Midi.pas',
