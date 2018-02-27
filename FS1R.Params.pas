@@ -14,34 +14,58 @@ uses
   {$SCOPEDENUMS ON}
 
 type
-TReserved=0..0;
 
-TLFODelay =(Onset,Ramp,Complete);
+  TMidiWord=0..127;
+  TSysexVal=0..127;
+  T0_99=0..99;
+  TMidiNote=0..127;
 
-TCategory=(
-  NoAssign=0,
-  Piano,
-  ChromaticPercussion,
-  Organ,
-  Guitar,
-  Bass,
-  StringsOrchestral,
-  Ensemble,
-  Brass,
-  Reed,
-  Pipe,
-  SynthLead,
-  SynthPad,
-  SynthSoundEffects,
-  Ethnic,
-  Percussive,
-  SoundEffects,
-  Drums,
-  SynthComping,
-  Vocal,
-  Combination,
-  MaterialWave,
-  Sequence=$16);
+  /// <summary>
+  /// sine     The operator will generate a sine wave which can be used for additive or FM synthesis.
+  /// all 1    Broad band — including all harmonics.
+  /// all 2    Narrow band — including all harmonics.
+  /// odd 1    Broad band — odd harmonics only.
+  /// odd 2    Narrow band — odd harmonics only.
+  /// res1     Resonant broad band.
+  /// res 1    Resonant narrow band.
+  /// frmt The operator will function as a formant for formant-shaping synthesis.
+  /// </summary>
+  TOscSpectralForm=(sine, all1, all2, odd1, odd2, res1, res2, frmt);
+
+  TCurve=(NegLin=0,NegExp, PosExp, Poslin);
+const
+  Notes:Array[0..11] of string=('C-','C#','D-','D#','E-','F-','F#','G-','G#','A-','A#','B-');
+  Curves:array[TCurve] of string=('-Lin','-exp','+exp','+lin');
+
+type
+  TReserved=0..0;
+
+  TLFODelay =(Onset,Ramp,Complete);
+
+  TCategory=(
+    NoAssign=0,
+    Piano,
+    ChromaticPercussion,
+    Organ,
+    Guitar,
+    Bass,
+    StringsOrchestral,
+    Ensemble,
+    Brass,
+    Reed,
+    Pipe,
+    SynthLead,
+    SynthPad,
+    SynthSoundEffects,
+    Ethnic,
+    Percussive,
+    SoundEffects,
+    Drums,
+    SynthComping,
+    Vocal,
+    Combination,
+    MaterialWave,
+    Sequence=$16);
 
   TBreakPoint=(
     A1,AS1,B1,C1,CS1,D1,DS1,E1,F1,FS1,G1,GS1,
@@ -980,8 +1004,8 @@ begin
   LevelScaling.BreakPoint:= TBreakPoint.C4;  // 17 VOICED level scaling - break point (A-1~C8)
   LevelScaling.LeftDpt   := $63;             // 18 VOICED level scaling - left depth
   LevelScaling.RightDpt  := $63;             // 19 VOICED level scaling - right depth
-  LevelScaling.LeftCurve := Midi.TCurve.NegLin;  // 1A VOICED level scaling - left  curve(0:-lin, 1:-exp, 2:+exp, 3:+lin)
-  LevelScaling.RightCurve:= Midi.TCurve.Poslin;  // 1B VOICED level scaling - right curve(0:-lin, 1:-exp, 2:+exp, 3:+lin)
+  LevelScaling.LeftCurve := TCurve.NegLin;  // 1A VOICED level scaling - left  curve(0:-lin, 1:-exp, 2:+exp, 3:+lin)
+  LevelScaling.RightCurve:= TCurve.Poslin;  // 1B VOICED level scaling - right curve(0:-lin, 1:-exp, 2:+exp, 3:+lin)
 
 
 //  Reserved    := array[0..2] of TReserved; // 1C reserved

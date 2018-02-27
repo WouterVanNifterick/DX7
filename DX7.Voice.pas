@@ -161,7 +161,7 @@ const exp_scale_data: array[0..32] of byte = (
 function ScaleCurve(group, depth:integer; curve:TCurve):integer;
 var n_scale_data, raw_exp, scale:integer;
 begin
-  if (curve = NegLin) or (curve = Poslin) then
+  if (curve = TCurve.NegLin) or (curve = TCurve.Poslin) then
     // linear
     scale := (group * depth * 329) shr 12
    else
