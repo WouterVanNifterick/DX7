@@ -31,9 +31,10 @@ implementation
 uses Math;
 
 function GetOsc(Waveform:TWaveForm; phase: double): double;
-var y,y2,y3,y4,p:double;
+var
+  y, y2, y3, y4, p : double;
 begin
-  p := FMod(phase,2*pi);
+  p  := FMod(phase,2*pi);
   y  := sin(phase);
   y2 := sin(phase*2);
   y3 := sin(phase+pi*0.5);
