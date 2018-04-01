@@ -76,7 +76,6 @@ begin
     Exit;
 
   frmMain.Synth.params.Operators[Tag-1] := GuiToParams.Operators[Tag-1];
-//  frmMain.Memo1.Text := frmMain.Synth.params.CSV; @@@
   PaintEnvelope;
   PaintBox1.Repaint;
   UpdateHints;
