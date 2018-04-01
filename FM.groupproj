@@ -15,6 +15,9 @@
         <Projects Include="..\PrintAlgorithms.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="Test\FmSynthTest.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -59,14 +62,23 @@
     <Target Name="PrintAlgorithms:Make">
         <MSBuild Projects="..\PrintAlgorithms.dproj" Targets="Make"/>
     </Target>
+    <Target Name="FmSynthTest">
+        <MSBuild Projects="Test\FmSynthTest.dproj"/>
+    </Target>
+    <Target Name="FmSynthTest:Clean">
+        <MSBuild Projects="Test\FmSynthTest.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FmSynthTest:Make">
+        <MSBuild Projects="Test\FmSynthTest.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="DX7VCL;SoundGen3;FMSynth;PrintAlgorithms"/>
+        <CallTarget Targets="DX7VCL;SoundGen3;FMSynth;PrintAlgorithms;FmSynthTest"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="DX7VCL:Clean;SoundGen3:Clean;FMSynth:Clean;PrintAlgorithms:Clean"/>
+        <CallTarget Targets="DX7VCL:Clean;SoundGen3:Clean;FMSynth:Clean;PrintAlgorithms:Clean;FmSynthTest:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="DX7VCL:Make;SoundGen3:Make;FMSynth:Make;PrintAlgorithms:Make"/>
+        <CallTarget Targets="DX7VCL:Make;SoundGen3:Make;FMSynth:Make;PrintAlgorithms:Make;FmSynthTest:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

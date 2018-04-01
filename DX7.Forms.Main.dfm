@@ -36,6 +36,16 @@ object frmMain: TfrmMain
     Height = 636
     Align = alLeft
     TabOrder = 0
+    object pb1: TPaintBox
+      Left = 1
+      Top = 180
+      Width = 337
+      Height = 176
+      Cursor = crDrag
+      Align = alTop
+      OnPaint = pb1Paint
+      ExplicitTop = 152
+    end
     object AdTimeDomain: TGuiAudioDataDisplay
       Left = 1
       Top = 22
@@ -65,7 +75,7 @@ object frmMain: TfrmMain
     end
     object SearchBox1: TSearchBox
       Left = 1
-      Top = 180
+      Top = 397
       Width = 337
       Height = 21
       Align = alTop
@@ -75,9 +85,9 @@ object frmMain: TfrmMain
     end
     object ListView1: TListView
       Left = 1
-      Top = 201
+      Top = 418
       Width = 337
-      Height = 434
+      Height = 217
       Align = alClient
       Columns = <
         item
@@ -116,10 +126,9 @@ object frmMain: TfrmMain
       Style = csDropDownList
       ItemIndex = 0
       TabOrder = 4
-      Text = 'Focusrite USB MIDI'
+      Text = '1-M8U MIDI'
       OnChange = MidiPortSelect1Change
       Items.Strings = (
-        'Focusrite USB MIDI'
         '1-M8U MIDI'
         '2-M8U MIDI'
         '3-M8U MIDI'
@@ -127,8 +136,26 @@ object frmMain: TfrmMain
         '5-M8U MIDI'
         '6-M8U MIDI'
         '7-M8U MIDI'
-        '8-M8U MIDI')
+        '8-M8U MIDI'
+        'Focusrite USB MIDI')
       MidiPort = MidiInput1
+    end
+    object pnl1: TPanel
+      Left = 1
+      Top = 356
+      Width = 337
+      Height = 41
+      Align = alTop
+      TabOrder = 5
+      object cmbWaveForm: TComboBox
+        Left = 8
+        Top = 14
+        Width = 145
+        Height = 21
+        TabOrder = 0
+        Text = 'cmbWaveForm'
+        OnChange = cmbWaveFormChange
+      end
     end
   end
   object Panel2: TPanel
@@ -1705,7 +1732,7 @@ object frmMain: TfrmMain
     end
   end
   object MidiInput1: TMidiInput
-    ProductName = '8-M8U MIDI'
+    ProductName = 'Focusrite USB MIDI'
     DeviceID = 8
     SysexBufferSize = 4096
     FilteredMessages = [msgActiveSensing, msgMidiTimeCode]

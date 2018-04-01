@@ -19,7 +19,6 @@ type
   private
     voices: TList<TDX7Voice>;
     sustainPedalDown: boolean;
-    LatestVoice:integer;
     function GetVoiceCount: integer;
     function GetEnvOutput(index: integer): double;
   public
@@ -256,7 +255,7 @@ var
   i      : integer;
 begin
   if self=nil then
-    Exit;
+    Exit(0);
 
   output := 0;
   for i := voices.Count - 1  downto 0 do

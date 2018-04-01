@@ -7,29 +7,29 @@ uses
   FS1R.Params;
 
 type
-  TLFODelayAr=array[TLFODelay] of double;
+  TLFODelayAr=array[TLFODelayStage] of double;
   TLfoDX7=record
   strict private
-    params:PVoiceParams;
-    delayVal : double;
-    Index:TOperatorIndex;
-    phase :double;
-    pitchVal :double;
-    counter :integer;
-    ampVal :double;
-    ampValTarget :double;
-    ampIncrement :double;
-    delayState : tLFODelay;
+    FParams      : PVoiceParams;
+    FDelay       : double;
+    FOpIndex     : TOperatorIndex;
+    FPhase       : double;
+    FPitch       : double;
+    FCounter     : integer;
+    FAmp         : double;
+    FAmpTarget   : double;
+    FAmpIncrement: double;
+    delayState   : TLFODelayStage;
 
     // Private static variables
-    phaseStep:double;
-    pitchModDepth:integer;
-    ampModDepth:double;
-    sampleHoldRandom:integer;
-    delayTimes     :TLFODelayAr;
-    delayIncrements:TLFODelayAr;
-    delayVals      :TLFODelayAr{ = (0, 0, 1)};
-    Initialized:boolean;
+    FPhaseStep       : double;
+    FPitchModDepth   : integer;
+    FAmpModDepth     : double;
+    FSampleHoldRandom: integer;
+    FDelayTimes      : TLFODelayAr;
+    FDelayIncrements : TLFODelayAr;
+    FDelayVals       : TLFODelayAr { = (0, 0, 1) };
+    IsInitialized    : boolean;
   public
     constructor Create(aIndex:TOperatorIndex; const aParams:PVoiceParams);
     procedure update;
@@ -145,7 +145,7 @@ const
 //     ╌━┻━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━
 //       0        10        20        30        40        50        60        70        80        90
 //                                                      Index
-  var LFO_AMP_MOD_TABLE:TArray<double> = [ // TODO: use lfo amp mod table
+LFO_AMP_MOD_TABLE:TArray<double> = [ // TODO: use lfo amp mod table
 	0.00000, 0.00793, 0.00828, 0.00864, 0.00902, 0.00941, 0.00982, 0.01025, 0.01070, 0.01117,
 	0.01166, 0.01217, 0.01271, 0.01327, 0.01385, 0.01445, 0.01509, 0.01575, 0.01644, 0.01716,
 	0.01791, 0.01870, 0.01952, 0.02037, 0.02126, 0.02220, 0.02317, 0.02418, 0.02524, 0.02635,
@@ -182,8 +182,7 @@ const
 // Wouter van Nifterick:
 // these are now hard-coded values.
 // Approximation formula: (Power(1.85;Index)-1)/((Power(1.85;MaxIndex))-1)
-
-var LFO_PITCH_MOD_TABLE:array of double = [
+LFO_PITCH_MOD_TABLE:array of double = [
 	0.0000,
   0.0264,
   0.0534,
@@ -202,31 +201,35 @@ end;
 
 constructor TLfoDX7.Create(aIndex:TOperatorIndex; const aParams:PVoiceParams);
 begin
-  self.params:= aParams;
-  self.Index := aIndex;
-	self.phase := 0;
-	self.pitchVal := 0;
-	self.counter := 0;
-	self.ampVal := 1;
-	self.ampValTarget := 1;
-	self.ampIncrement := 0;
-	self.delayVal := 0;
-	self.delayState := TLFODelay.Onset;
+  self := default(TLfoDX7);
+  self.FParams:= aParams;
+  self.FOpIndex := aIndex;
+	self.FPhase := 0;
+	self.FPitch := 0;
+	self.FCounter := 0;
+	self.FAmp := 1;
+	self.FAmpTarget := 1;
+	self.FAmpIncrement := 0;
+	self.FDelay := 0;
+	self.delayState := TLFODelayStage.Onset;
 
-  self.sampleHoldRandom := 0;
-  self.phaseStep :=0;
-  self.pitchModDepth := 0;
-  self.delayTimes[TLFODelay.Onset   ] := 0;
-  self.delayTimes[TLFODelay.Ramp    ] := 0;
-  self.delayTimes[TLFODelay.Complete] := 0;
-  self.delayIncrements[TLFODelay.Onset   ] := 0;
-  self.delayIncrements[TLFODelay.Ramp    ] := 0;
-  self.delayIncrements[TLFODelay.Complete] := 0;
-  self.delayVals[TLFODelay.Onset   ] := 0;
-  self.delayVals[TLFODelay.Ramp    ] := 0;
-  self.delayVals[TLFODelay.Complete] := 0;
+  self.FSampleHoldRandom := 0;
+  self.FPhaseStep :=0;
+  self.FPitchModDepth := 0;
 
-  self.Initialized := True;
+  self.FDelayTimes[TLFODelayStage.Onset   ] := 0;
+  self.FDelayTimes[TLFODelayStage.Ramp    ] := 0;
+  self.FDelayTimes[TLFODelayStage.Complete] := 0;
+
+  self.FDelayIncrements[TLFODelayStage.Onset   ] := 0;
+  self.FDelayIncrements[TLFODelayStage.Ramp    ] := 0;
+  self.FDelayIncrements[TLFODelayStage.Complete] := 0;
+
+  self.FDelayVals[TLFODelayStage.Onset   ] := 0;
+  self.FDelayVals[TLFODelayStage.Ramp    ] := 0;
+  self.FDelayVals[TLFODelayStage.Complete] := 0;
+
+  self.IsInitialized := True;
 	update();
 end;
 
@@ -237,106 +240,103 @@ var
   Lphase : integer;
 begin
   amp := 0;
-  Assert(Initialized,'Not initialized');
-  Assert(Params<>nil,'No params');
-	if (counter mod config.lfoSamplePeriod) = 0 then
+  Assert(IsInitialized,'Not initialized');
+  Assert(FParams<>nil,'No params');
+	if (FCounter mod config.lfoSamplePeriod) = 0 then
   begin
-    Assert(Params<>nil,'Params is nill');
-		case Params.Common.LFO1.Waveform of
-			TLFOWaveForm.Triangle:  if self.phase < config.periodHalf then amp := 4     * self.phase * Config.periodRecip - 1
-                                                                else amp := 3 - 4 * self.phase * config.periodRecip;
-			TLFOWaveForm.SawDown:   		                                   amp := 1 - 2 * self.phase * config.periodRecip;
-			TLFOWaveForm.SawUp:     		                                   amp := 2     * self.phase * config.periodRecip - 1;
-			TLFOWaveForm.Square:    if self.phase < config.periodHalf then amp := -1
-                                                                else amp := 1;
-			TLFOWaveForm.Sine:       		                                   amp := sin(self.phase);
-			TLFOWaveForm.SampleHold:		                                   amp := sampleHoldRandom;
+		case FParams.Common.LFO1.Waveform of
+			TLFOWaveForm.Triangle:  if self.FPhase < config.periodHalf then amp := 4     * self.FPhase * Config.periodRecip - 1
+                                                                 else amp := 3 - 4 * self.FPhase * config.periodRecip;
+			TLFOWaveForm.SawDown:   		                                    amp := 1 - 2 * self.FPhase * config.periodRecip;
+			TLFOWaveForm.SawUp:     		                                    amp := 2     * self.FPhase * config.periodRecip - 1;
+			TLFOWaveForm.Square:    if self.FPhase < config.periodHalf then amp := -1
+                                                                 else amp := 1;
+			TLFOWaveForm.Sine:       		                                    amp := sin(self.FPhase);
+			TLFOWaveForm.SampleHold:		                                    amp := FSampleHoldRandom;
 		end;
 
 		case self.delayState of
-			TLFODelay.Onset,
-			TLFODelay.Ramp:
+			TLFODelayStage.Onset,
+			TLFODelayStage.Ramp:
         begin
-				  self.delayVal := self.delayVal + delayIncrements[self.delayState];
-   				if (self.counter / config.lfoSamplePeriod > delayTimes[self.delayState]) then
+				  self.FDelay := self.FDelay + FDelayIncrements[self.delayState];
+   				if (self.FCounter / config.lfoSamplePeriod > FDelayTimes[self.delayState]) then
           begin
   					inc(self.delayState);
-  					self.delayVal := delayVals[self.delayState];
+  					self.FDelay := FDelayVals[self.delayState];
   				end;
         end;
-			TLFODelay.Complete:
+			TLFODelayStage.Complete:
 		end;
 
 //		if (self.counter mod 10000 = 0) and (self.Index = 0) then
 //    OutputDebugString(PChar(Format('[%d] lfo amp value %f',[self.Index, self.ampVal]))) ;
 
     Assert(InRange(amp,-1,1));
-    Assert(InRange(self.delayVal,0,1));
-		amp := amp * self.delayVal;
+    Assert(InRange(self.FDelay,0,1));
+		amp := amp * self.FDelay;
     Assert(InRange(amp,-1,1));
-    Assert(self.Params<>nil,'No params');
-//    Assert(InRange(self.Params.Common.LFO1.PMD,low(LFO_PITCH_MOD_TABLE), High(LFO_PITCH_MOD_TABLE)),'Params.lfoPitchModSens out of range:'+IntToStr(Params.Common.LFO1.PMD));
-    {needs to be pitch mod sense}
+    Assert(self.FParams<>nil,'No params');
+    Assert(FPitchModDepth>=0);
+    FPitchModDepth := trunc(1 + LFO_PITCH_MOD_TABLE[FParams.Operators[FOpIndex].Voiced.Sensitivity.vPitchEnv] * (FParams.controllerModVal + FParams.Operators[FOpIndex].Voiced.Sensitivity.vPitchEnv / 99));
 
-		pitchModDepth := trunc(1 + LFO_PITCH_MOD_TABLE[Params.Common.LFO1.PMD] * (Params.controllerModVal + Params.Common.LFO1.PMD / 99));
-
-		self.pitchVal := power(pitchModDepth, amp);
+    self.FPitch := power(FPitchModDepth, amp);
 
 		// TODO: Simplify ampValTarget calculation.
 		// ampValTarget range := 0 to 1.
     // lfoAmpModSens range := -3 to 3.
     // ampModDepth range :=  0 to 1.
     // amp range := -1 to 1.
-    ampSensDepth := abs(self.params.operators[Index].Voiced.Sensitivity.AmpModSense) * (1/3);
+    ampSensDepth := abs(self.FParams.operators[FOpIndex].Voiced.Sensitivity.AmpModSense) * (1/3);
 
-    AssertInRange(Index,0,OPERATOR_COUNT,'index' );
-    AssertInRange(ampValTarget,0,1,'ampValTarget');
+    AssertInRange(FOpIndex,0,OPERATOR_COUNT,'index' );
+    AssertInRange(FAmpTarget,0,1,'ampValTarget');
     AssertInRange(ampSensDepth,0,1,'ampSensDepth');
     AssertInRange(amp,-1,1,'amp');
 
-    if self.params.operators[Index].Voiced.Sensitivity.AmpModSense > 0 then
+    if self.FParams.operators[FOpIndex].Voiced.Sensitivity.AmpModSense > 0 then
       Lphase := 1
     else
       Lphase := -1;
 
-		self.ampValTarget := 1 - ((ampModDepth   + Params.controllerModVal) * ampSensDepth * (amp * Lphase + 1) * 0.5);
-		self.ampIncrement := (self.ampValTarget - self.ampVal) / Config.lfoSamplePeriod;
-		self.phase := self.phase + phaseStep;
-		if self.phase >= config.period then
+		self.FAmpTarget := 1 - ((FAmpModDepth   + FParams.controllerModVal) * ampSensDepth * (amp * Lphase + 1) * 0.5);
+		self.FAmpIncrement := (self.FAmpTarget - self.FAmp) / Config.lfoSamplePeriod;
+		self.FPhase := self.FPhase + FPhaseStep;
+		if self.FPhase >= config.period then
     begin
-      case Params.Common.LFO1.WaveForm of
+      case FParams.Common.LFO1.WaveForm of
         TLFOWaveForm.SampleHold :
-          sampleHoldRandom := System.Round(1 - random * 2);
+          FSampleHoldRandom := System.Round(1 - random * 2);
       end;
 
-			self.phase := self.phase - config.period;
+			self.FPhase := self.FPhase - config.period;
 		end;
 	end;
-	inc(counter);
-	Result := self.pitchVal;
+	inc(FCounter);
+	Result := self.FPitch;
 end;
 
 function TLfoDX7.renderAmp : double;
 begin
-	self.ampVal := self.ampVal + self.ampIncrement;
-	Result := self.ampVal;
+	self.FAmp := self.FAmp + self.FAmpIncrement;
+	Result := self.FAmp;
 end;
 
 procedure TLfoDX7.update;
 var
   frequency: double;
 begin
-  Assert(Params<>nil);
-  Assert(Params.Common.LFO1.Speed >= 0,inttostr(Params.Common.LFO1.Speed));
+  Assert(FParams<>nil);
+  Assert(FParams.Common.LFO1.Speed >= 0,inttostr(FParams.Common.LFO1.Speed));
 
-  frequency   := LFO_FREQUENCY_TABLE[Params.Common.LFO1.Speed];
-  phaseStep   := Config.period * frequency / Config.lfoRate; // radians per sample
-  ampModDepth := Params.Common.LFO1.AMD {lfo.AmpModDepth} * 0.01;
+  frequency   := LFO_FREQUENCY_TABLE[FParams.Common.LFO1.Speed];
+  FPhaseStep   := Config.period * frequency / Config.lfoRate; // radians per sample
+  FAmpModDepth := FParams.Common.LFO1.AMD {lfo.AmpModDepth} * 0.01;
 
   // ignoring amp mod table for now. it seems shallow LFO_AMP_MOD_TABLE[params.lfoAmpModDepth];
-  delayTimes     [TLFODelay.Onset] := (Config.lfoRate * 0.001753 * power(Params.Common.LFO1.Delay, 3.10454) + 169.344 - 168) / 1000;
-  delayTimes     [TLFODelay.Ramp ] := (Config.lfoRate * 0.321877 * power(Params.Common.LFO1.Delay, 2.01163) + 494.201 - 168) / 1000;
-  delayIncrements[TLFODelay.Ramp ] := 1 / (delayTimes[TLFODelay.Ramp] - delayTimes[TLFODelay.Onset]);
+  FDelayTimes     [TLFODelayStage.Onset] := (Config.lfoRate * 0.001753 * power(FParams.Common.LFO1.Delay, 3.10454) + 169.344 - 168) / 1000;
+  FDelayTimes     [TLFODelayStage.Ramp ] := (Config.lfoRate * 0.321877 * power(FParams.Common.LFO1.Delay, 2.01163) + 494.201 - 168) / 1000;
+  FDelayIncrements[TLFODelayStage.Ramp ] := 1 / (FDelayTimes[TLFODelayStage.Ramp] - FDelayTimes[TLFODelayStage.Onset]);
 end;
 
 end.

@@ -14,6 +14,7 @@ uses
   Generics.Collections,
   Generics.Defaults,
   DX7.Synth, Vcl.ExtCtrls,
+  FM.Oscillator,
 
   DAV_Classes, DAV_AudioData, DAV_AsioHost, DAV_Types,
 
@@ -63,6 +64,9 @@ type
     MidiPortSelect1: TMidiPortSelect;
     stat1: TStatusBar;
     ApplicationEvents1: TApplicationEvents;
+    pb1: TPaintBox;
+    pnl1: TPanel;
+    cmbWaveForm: TComboBox;
     procedure LoadParams(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure DriverComboChange(Sender: TObject);
@@ -86,6 +90,8 @@ type
     procedure MidiPortSelect1Change(Sender: TObject);
     procedure ApplicationEvents1Hint(Sender: TObject);
     procedure ListView1ColumnClick(Sender: TObject; Column: TListColumn);
+    procedure cmbWaveFormChange(Sender: TObject);
+    procedure pb1Paint(Sender: TObject);
     //procedure Panel3Click(Sender: TObject);
   private
     /// <summary>
@@ -237,9 +243,70 @@ end;
 
 procedure TfrmMain.MidiPortSelect1Change(Sender: TObject);
 begin
+  MidiInput1.Close;
   MidiInput1.DeviceID := MidiPortSelect1.ItemIndex;
   MidiInput1.OpenAndStart;
+end;
 
+procedure TfrmMain.pb1Paint(Sender: TObject);
+var h2,i,j:Integer;
+  p:TPaintBox; c:TCanvas;
+  wd:integer;
+  w:TWaveForm;
+  function GetY:Integer;
+  begin
+    Result := round(h2 + WaveFunctions[ w ](2*pi*I / wd )*h2);
+  end;
+const
+  Count=2;
+begin
+  if Sender = nil then
+    Exit;
+
+  if cmbWaveForm.ItemIndex<0 then
+    Exit;
+
+  p := Sender as TPaintBox;
+  c := p.Canvas;
+  h2 := p.Height div 2;
+
+
+  w := TWaveForm(cmbWaveForm.ItemIndex);
+
+  c.Brush.Color := clBlack;
+  c.FillRect(p.ClientRect);
+
+  // draw grid
+  c.Pen.Color := clGray;
+  c.MoveTo(0,h2 );
+  c.LineTo(p.Width-1,h2);
+
+  wd := p.Width div Count;
+
+  for j:=0 to Count-1 do
+  begin
+    if Odd(j) then
+      c.Pen.Color := clGray
+    else
+      c.Pen.Color := clDkGray;
+
+    c.MoveTo(j*wd ,0 );
+    c.LineTo(j*wd,p.Height-1);
+    c.MoveTo(j*wd+ (wd div 2),0 );
+    c.LineTo(j*wd+ (wd div 2),p.Height-1);
+  end;
+
+  for j:=0 to Count-1 do
+  begin
+    // draw waveform
+    I := wd * j;
+    c.MoveTo(wd*j,GetY );
+    c.Pen.Color := clWhite;
+  end;
+  c.MoveTo(0,h2 );
+
+  for I := 0 to p.Width-1 do
+    c.LineTo(I,p.Height-GetY);
 end;
 
 {
@@ -296,7 +363,7 @@ begin
     p.operators[op].keyScale.Rate       := v.Operators[op].Voiced.LevelScaling.TotalLvl; // ???
 
   end;
-//  Synth.params := p; @@@
+//  Synth.params := p;
   Synth.allNotesOff;
 
   SynthToGui;
@@ -320,6 +387,11 @@ begin
     end;
   MidiFile1.StartPlaying;
 }
+end;
+
+procedure TfrmMain.cmbWaveFormChange(Sender: TObject);
+begin
+  pb1.Repaint;
 end;
 
 procedure TfrmMain.LoadAllPatches(Sender: TObject);
@@ -351,7 +423,7 @@ begin
 end;
 
 procedure TfrmMain.UpdateFilter;
-var i,j:integer;s:string;
+var i:integer;s:string;
 begin
   s := SearchBox1.Text;
   s := s.Trim.ToLower;
@@ -416,11 +488,11 @@ begin
     try
       TSysexDX7.loadBank(f, pb);
       for I := 0 to pb.Count - 1 do
-      //      if pb[I].OpsUsed > 0 then @@@
-      begin
-        pb[i].SetBankName(ChangeFileExt(ExtractFileName(f), ''));
-        AllPatches.Add(pb[I]);
-      end;
+        if pb[I].GetOpsCount > 0 then
+        begin
+          pb[i].SetBankName(ChangeFileExt(ExtractFileName(f), ''));
+          AllPatches.Add(pb[I]);
+        end;
     finally
       pb.Free;
     end;
@@ -432,7 +504,7 @@ var
   f: TFrame1;
 begin
   Algorithm.Position  := Synth.params.Common.Algorithm;
-  PatchName.Text      := Synth.params.Common.Name;
+  PatchName.Text      := string(Synth.params.Common.Name);
   Feedback.Position   := Synth.params.Common.FeedBack;
   for f in TArray<TFrame1>.Create(Frame11, Frame12, Frame13, Frame14, Frame15, Frame16) do
     f.ParamsToGui(Synth.params.Operators[f.Tag - 1].Voiced);
@@ -510,7 +582,7 @@ begin
   begin
     Item.Caption := Item.Index.ToString;
     Item.SubItems.Add( BankName );
-    Item.SubItems.Add( Common.Name );
+    Item.SubItems.Add( string(Common.Name) );
     Item.SubItems.Add( IntToStr(Common.Algorithm+1) );
     Item.SubItems.Add( IntToStr(GetOpsCount) );
   end;
@@ -542,18 +614,20 @@ end;
 
 procedure TfrmMain.DriverComboChange(Sender: TObject);
 begin
- DriverCombo.ItemIndex := DriverCombo.Items.IndexOf(DriverCombo.Text);
- if DriverCombo.ItemIndex >= 0 then
+//  DriverCombo.ItemIndex := DriverCombo.Items.IndexOf(DriverCombo.Text);
+  if DriverCombo.ItemIndex >= 0 then
   begin
-   ASIOHost.DriverIndex := DriverCombo.ItemIndex;
-   ASIOHost.Active  := True;
-   GuiTimer.Enabled := True;
+    ASIOHost.Active      := False;
+    ASIOHost.DriverIndex := DriverCombo.ItemIndex;
+    ASIOHost.Active      := True;
+    GuiTimer.Enabled     := True;
   end;
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 var
   I: Integer;
+  w: TWaveForm;
 begin
 //  DirectoryListBox1.Directory := 'c:\Users\Wouter\Documents\Embarcadero\Studio\Projects\DX7\Patches\AJay';
   Octave := 1;
@@ -588,6 +662,13 @@ begin
     OpFrames[I].Tag := I;
     OpFrames[I].lblCaption.Caption := Format('Op %d',[I]);
   end;
+
+  for w := Low(TWaveForm) to High(TWaveForm) do
+  begin
+    cmbWaveForm.Items.Add(WaveDescription[w].Name);
+  end;
+
+
 end;
 
 
@@ -606,6 +687,8 @@ procedure TfrmMain.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var r,note:integer;
 begin
+  Exit;
+
   if KeyPressed[key] then
     Exit;
 
@@ -630,6 +713,7 @@ procedure TfrmMain.FormKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var note:integer;
 begin
+  Exit;
   if Synth=nil then Exit;
 
   // Slash    (/) for octave down
@@ -680,7 +764,7 @@ end;
 
 var InTimer:Boolean;
 procedure TfrmMain.GuiTimerTimer(Sender: TObject);
-var i,v:integer; o:double;
+var i:integer; o:double;
 begin
 
   if synth=nil then
@@ -701,7 +785,6 @@ begin
     if synth.VoiceCount=0 then
       Exit;
 
-    v := Synth.VoiceCount-1;
     for I := 1 to Length(OpFrames) do
       if OpFrames[I]<>nil then
       begin
