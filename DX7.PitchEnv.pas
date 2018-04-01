@@ -129,6 +129,7 @@ begin
 	levels := @Params.Common.PitchEG.Envelope.Levels;
 	rates := @Params.Common.PitchEG.Envelope.Rates;
 
+  rising := False;
 	level := levels[3];
 	down := true;
 	decayIncrement := 0;
@@ -138,7 +139,7 @@ end;
 
 function TPitchEnvelopeDX7.render:double;
 begin
-  Exit(1);
+//  Exit(1);
 	if (state < 3) or ((state < 4) and (not down)) then
   begin
     if rising then begin
@@ -164,7 +165,8 @@ procedure TPitchEnvelopeDX7.advance(newstate:integer);
 var newlevel:integer;
 begin
 	self.state := newstate;
-	if (self.state < 4) then begin
+	if (self.state < 4) then
+  begin
 		newlevel := self.levels[self.state];
 		targetlevel := pitchenv_tab[newlevel] shl 19;
 		rising := self.targetlevel > self.level;
