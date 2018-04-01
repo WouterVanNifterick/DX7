@@ -4,12 +4,11 @@ interface
 
 type
   TWaveForm = (
-      sinus,
+      Sinus,
       opl2_w1,
       opl2_w2,
       opl2_w3,
       opl2_w4,
-
       op4_w1,
       op4_w2,
       op4_w3,
@@ -17,28 +16,445 @@ type
       op4_w5,
       op4_w6,
       op4_w7,
-      op4_w8
+      op4_w8,
+
+      op8_w7,
+
+      all1,
+      all2,
+      odd1,
+      odd2,
+      res1,
+      res2,
+      formant,
+
+      saw_up,
+      saw_down,
+      square,
+      triangle,
+      whitenoise
       );
+
+type
+  TOscillatorFunc = function(aPhase:Double; skirt:integer=0; resonance:Integer=0; freq:Integer=0):Double;
+
+const
+  WaveDescription: array[TWaveForm] of record
+    WaveForm:TWaveForm;
+    Name:string;
+    Description:string;
+  end=
+  (
+    (WaveForm:Sinus     ; Name:'sinus'  ;   Description: 'Sine wave. Only fundamental'),
+    (WaveForm:opl2_w1   ; Name:'opl2_w1';   Description: 'Sine wave. Only fundamental'),
+    (WaveForm:opl2_w2   ; Name:'opl2_w2';   Description: ''),
+    (WaveForm:opl2_w3   ; Name:'opl2_w3';   Description: ''),
+    (WaveForm:opl2_w4   ; Name:'opl2_w4';   Description: ''),
+    (WaveForm:op4_w1    ; Name:'op4_w1' ;   Description: 'Sine wave. Only fundamental'),
+    (WaveForm:op4_w2    ; Name:'op4_w2' ;   Description: 'Odd Partials 1,3,5,7'),
+    (WaveForm:op4_w3    ; Name:'op4_w3' ;   Description: 'Even Partials 1,2,4,6'),
+    (WaveForm:op4_w4    ; Name:'op4_w4' ;   Description: 'Partials 1,2,3'),
+    (WaveForm:op4_w5    ; Name:'op4_w5' ;   Description: 'Partials 1,2,3,5'),
+    (WaveForm:op4_w6    ; Name:'op4_w6' ;   Description: 'Partials 1,2,3,5'),
+    (WaveForm:op4_w7    ; Name:'op4_w7' ;   Description: 'Partials 1,3,4,5'),
+    (WaveForm:op4_w8    ; Name:'op4_w8' ;   Description: 'Partials 1,3,4,5'),
+
+    (WaveForm:op8_w7    ; Name:'op8_w7' ;   Description: ''),
+
+    // All/Odd/Res forms have two variants. These differ similarly to wide and narrow analog pulse waves. Effectively '1' sound fuller and '2' thinner.
+    // All/Odd forms with higher skirt values produce spectrum similar to saw and square respectively. These waveforms can be used as basic saw/square equivalents
+    (WaveForm:all1     ; Name:'all1'    ;   Description: 'All harmonics with decaying amplitudes (Broad band)'),
+    (WaveForm:all2     ; Name:'all2'    ;   Description: 'All harmonics with decaying amplitudes (Narrow band)'),
+    (WaveForm:odd1     ; Name:'odd1'    ;   Description: 'Odd harmonics with decaying amplitudes (Broad band)'),
+    (WaveForm:odd2     ; Name:'odd2'    ;   Description: 'Odd harmonics with decaying amplitudes (Narrow band)'),
+    (WaveForm:res1     ; Name:'res1'    ;   Description: 'Selected consecutive harmonics with symmetric amplitudes (Broad band)'),
+    (WaveForm:res2     ; Name:'res2'    ;   Description: 'Selected consecutive harmonics with symmetric amplitudes (Narrow band)'),
+    (WaveForm:formant  ; Name:'formant ';   Description: 'All harmonics with bell shaped emphasis'),
+
+    (WaveForm:saw_up    ; Name:'saw_up'    ; Description: ''),
+    (WaveForm:saw_down  ; Name:'saw_down'  ; Description: ''),
+    (WaveForm:square    ; Name:'square'    ; Description: ''),
+    (WaveForm:triangle  ; Name:'triangle'  ; Description: ''),
+    (WaveForm:whitenoise; Name:'whitenoise'; Description: '')
+  );
+
+function get_sinus        (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_opl2_w1      (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_opl2_w2      (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_opl2_w3      (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_opl2_w4      (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_op4_w1       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_op4_w2       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_op4_w3       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_op4_w4       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_op4_w5       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_op4_w6       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_op4_w7       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_op4_w8       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+
+function get_op8_w7       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+
+function get_all1         (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_all2         (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_odd1         (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_odd2         (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_res1         (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_res2         (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_formant      (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+
+function get_saw_up       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_saw_down     (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_square       (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_triangle     (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+function get_whitenoise   (aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+
+const
+  WaveFunctions: array[TWaveForm] of TOscillatorFunc =
+  (
+     get_sinus     ,
+     get_opl2_w1   ,
+     get_opl2_w2   ,
+     get_opl2_w3   ,
+     get_opl2_w4   ,
+     get_op4_w1    ,
+     get_op4_w2    ,
+     get_op4_w3    ,
+     get_op4_w4    ,
+     get_op4_w5    ,
+     get_op4_w6    ,
+     get_op4_w7    ,
+     get_op4_w8    ,
+
+     get_op8_w7    ,
+
+     get_all1      ,
+     get_all2      ,
+     get_odd1      ,
+     get_odd2      ,
+     get_res1      ,
+     get_res2      ,
+     get_formant   ,
+
+     get_saw_up    ,
+     get_saw_down  ,
+     get_square    ,
+     get_triangle  ,
+     get_whitenoise
+  );
+
+
 
 /// <summary>
 ///
 /// </summary>
-function GetOsc(WaveForm:TWaveForm; phase: double): double;
+function GetOsc(Waveform:TWaveForm; aPhase: double): double;
 //function GetSine(phi:double):double;
 
 implementation
 
-uses Math;
+uses Math, System.SysUtils;
 
-function GetOsc(Waveform:TWaveForm; phase: double): double;
-var
-  y, y2, y3, y4, p : double;
+
+
+//     1 ┼─────────┼─────────▄▄▄▄▄▀▄▄▄▄▄─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.900 |         |      ▄▀▀|         |▀▀▄      |         |         |         |         |         |
+// 0.800 ┼─────────┼───▄▀▀───┼─────────┼───▀▀▄───┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.700 |         | ▄▀      |         |      ▀▄ |         |         |         |         |         |
+// 0.600 ┼─────────▄▀────────┼─────────┼────────▀▄─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.500 |       ▄▀|         |         |         |▀▄       |         |         |         |         |
+// 0.400 ┼─────▄▀──┼─────────┼─────────┼─────────┼──▀▄─────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.300 |    ▀    |         |         |         |    ▀    |         |         |         |         |
+// 0.200 ┼──▄▀─────┼─────────┼─────────┼─────────┼─────▀▄──┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.100 |▄▀       |         |         |         |       ▀▄|         |         |         |         |
+//     0 ▀─────────┼─────────┼─────────┼─────────┼─────────▀─────────┼─────────┼─────────┼─────────┼────────
+//-0.100 |         |         |         |         |         |▀▄       |         |         |         |       ▄
+//-0.200 ┼─────────┼─────────┼─────────┼─────────┼─────────┼──▀▄─────┼─────────┼─────────┼─────────┼─────▄▀─
+//-0.300 |         |         |         |         |         |    ▄    |         |         |         |    ▄
+//-0.400 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────▀▄──┼─────────┼─────────┼─────────┼──▄▀────
+//-0.500 |         |         |         |         |         |       ▀▄|         |         |         |▄▀
+//-0.600 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────▀▄────────┼─────────┼────────▄▀────────
+//-0.700 |         |         |         |         |         |         | ▀▄      |         |      ▄▀ |
+//-0.800 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───▀▄▄───┼─────────┼───▄▄▀───┼────────
+//-0.900 |         |         |         |         |         |         |      ▀▄▄|         |▄▄▀      |
+//    -1 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────▀▀▀▀▀▀▀▀▀▀▀─────────┼────────
+//      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
+//       0         10        20        30        40        50        60        70        80        90
+function get_sinus(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
 begin
-  p  := FMod(phase,2*pi);
-  y  := sin(phase);
-  y2 := sin(phase*2);
-  y3 := sin(phase+pi*0.5);
-  y4 := sin((phase+pi)*2+pi*0.5);
+  Result  := sin(aPhase);
+end;
+
+function get_opl2_w1(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  Result  := sin(aPhase);
+end;
+
+//     1 ┼─────────┼─────────┼─▄▄▄▀▄▄▄─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.950 |         |        ▄▀▀       ▀▀▄        |         |         |         |         |         |
+// 0.900 ┼─────────┼──────▄▀─┼─────────┼─▀▄──────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.850 |         |     ▄   |         |   ▄     |         |         |         |         |         |
+// 0.800 ┼─────────┼────▀────┼─────────┼────▀────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.750 |         |  ▄▀     |         |     ▀▄  |         |         |         |         |         |
+// 0.700 ┼─────────┼─▄───────┼─────────┼───────▄─┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.650 |         |▄        |         |        ▄|         |         |         |         |         |
+// 0.600 ┼─────────▄─────────┼─────────┼─────────▄─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.550 |        ▄|         |         |         |▄        |         |         |         |         |
+// 0.500 ┼───────▄─┼─────────┼─────────┼─────────┼─▄───────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.450 |      ▄  |         |         |         |  ▄      |         |         |         |         |
+// 0.400 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.350 |     ▀   |         |         |         |   ▀     |         |         |         |         |
+// 0.300 ┼────▀────┼─────────┼─────────┼─────────┼────▀────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.250 |   ▄     |         |         |         |     ▄   |         |         |         |         |
+// 0.200 ┼──▄──────┼─────────┼─────────┼─────────┼──────▄──┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.150 | ▄       |         |         |         |       ▄ |         |         |         |         |
+// 0.100 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.050 |▀        |         |         |         |        ▀|         |         |         |         |
+//     0 ▀─────────┼─────────┼─────────┼─────────┼─────────▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+//      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
+//       0         10        20        30        40        50        60        70        80        90
+// Even partials:
+function get_opl2_w2(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  if FMod(aPhase, 2 * pi) > pi then
+    Result := 0
+  else
+    Result := sin(aPhase);
+end;
+
+//     1 ┼─────────┼─────────┼─▄▄▄▀▄▄▄─┼─────────┼─────────┼─────────┼─────────┼─▄▄▄▀▄▄▄─┼─────────┼────────
+// 0.950 |         |        ▄▀▀       ▀▀▄        |         |         |        ▄▀▀       ▀▀▄        |
+// 0.900 ┼─────────┼──────▄▀─┼─────────┼─▀▄──────┼─────────┼─────────┼──────▄▀─┼─────────┼─▀▄──────┼────────
+// 0.850 |         |     ▄   |         |   ▄     |         |         |     ▄   |         |   ▄     |
+// 0.800 ┼─────────┼────▀────┼─────────┼────▀────┼─────────┼─────────┼────▀────┼─────────┼────▀────┼────────
+// 0.750 |         |  ▄▀     |         |     ▀▄  |         |         |  ▄▀     |         |     ▀▄  |
+// 0.700 ┼─────────┼─▄───────┼─────────┼───────▄─┼─────────┼─────────┼─▄───────┼─────────┼───────▄─┼────────
+// 0.650 |         |▄        |         |        ▄|         |         |▄        |         |        ▄|
+// 0.600 ┼─────────▄─────────┼─────────┼─────────▄─────────┼─────────▄─────────┼─────────┼─────────▄────────
+// 0.550 |        ▄|         |         |         |▄        |        ▄|         |         |         |▄
+// 0.500 ┼───────▄─┼─────────┼─────────┼─────────┼─▄───────┼───────▄─┼─────────┼─────────┼─────────┼─▄──────
+// 0.450 |      ▄  |         |         |         |  ▄      |      ▄  |         |         |         |  ▄
+// 0.400 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.350 |     ▀   |         |         |         |   ▀     |     ▀   |         |         |         |   ▀
+// 0.300 ┼────▀────┼─────────┼─────────┼─────────┼────▀────┼────▀────┼─────────┼─────────┼─────────┼────▀───
+// 0.250 |   ▄     |         |         |         |     ▄   |   ▄     |         |         |         |     ▄
+// 0.200 ┼──▄──────┼─────────┼─────────┼─────────┼──────▄──┼──▄──────┼─────────┼─────────┼─────────┼──────▄─
+// 0.150 | ▄       |         |         |         |       ▄ | ▄       |         |         |         |       ▄
+// 0.100 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
+// 0.050 |▀        |         |         |         |        ▀|▀        |         |         |         |
+//     0 ▀─────────┼─────────┼─────────┼─────────┼─────────▀─────────┼─────────┼─────────┼─────────┼────────
+//      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
+//       0         10        20        30        40        50        60        70        80        90
+function get_opl2_w3(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  Result := Abs(sin(aPhase));
+end;
+
+//     1 ┼─────────┼─────────┼─████────┼─────────┼─────────┼─────────┼─────────┼─████────┼─────────┼────────
+// 0.950 |         |        ▄▄█████    |         |         |         |        ▄▄█████    |         |
+// 0.900 ┼─────────┼──────▄▄███████────┼─────────┼─────────┼─────────┼──────▄▄███████────┼─────────┼────────
+// 0.850 |         |     ▄█████████    |         |         |         |     ▄█████████    |         |
+// 0.800 ┼─────────┼────███████████────┼─────────┼─────────┼─────────┼────███████████────┼─────────┼────────
+// 0.750 |         |  ▄████████████    |         |         |         |  ▄████████████    |         |
+// 0.700 ┼─────────┼─▄█████████████────┼─────────┼─────────┼─────────┼─▄█████████████────┼─────────┼────────
+// 0.650 |         |▄██████████████    |         |         |         |▄██████████████    |         |
+// 0.600 ┼─────────▄███████████████────┼─────────┼─────────┼─────────▄███████████████────┼─────────┼────────
+// 0.550 |        ▄████████████████    |         |         |        ▄████████████████    |         |
+// 0.500 ┼───────▄█████████████████────┼─────────┼─────────┼───────▄█████████████████────┼─────────┼────────
+// 0.450 |      ▄██████████████████    |         |         |      ▄██████████████████    |         |
+// 0.400 ┼──────███████████████████────┼─────────┼─────────┼──────███████████████████────┼─────────┼────────
+// 0.350 |     ████████████████████    |         |         |     ████████████████████    |         |
+// 0.300 ┼────▄████████████████████────┼─────────┼─────────┼────▄████████████████████────┼─────────┼────────
+// 0.250 |   ▄█████████████████████    |         |         |   ▄█████████████████████    |         |
+// 0.200 ┼──▄██████████████████████────┼─────────┼─────────┼──▄██████████████████████────┼─────────┼────────
+// 0.150 | ▄███████████████████████    |         |         | ▄███████████████████████    |         |
+// 0.100 ┼─████████████████████████────┼─────────┼─────────┼─████████████████████████────┼─────────┼────────
+// 0.050 |█████████████████████████    |         |         |█████████████████████████    |         |
+//     0  ██████████████████████████████████████████████████████████████████████████████████████████████████
+//      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
+//       0         10        20        30        40        50        60        70        80        90
+function get_opl2_w4(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+var
+  p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+
+       if (p > 0.5 * pi) and (p < 1 * pi) then Result := 0
+  else if (p > 1.5 * pi) and (p < 2 * pi) then Result := 0
+  else if (p < pi)                        then Result := Sin(p)
+  else                                         Result := -Sin(p);
+
+end;
+
+function get_op4_w1(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  Result  := sin(aPhase);
+end;
+
+function get_op4_w2(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+var
+  p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+  if p < pi then
+    Result := +1 - abs(sin(aPhase+pi*0.5))
+            else
+    Result := -1 + abs(sin(aPhase+pi*0.5));
+end;
+
+function get_op4_w3(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  if aPhase > pi then
+    Result := 0
+  else
+    Result := sin(aPhase);
+end;
+
+function get_op4_w4(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+var
+  p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+  if p<pi then
+    Result := 1-abs(sin(p+pi*0.5))
+  else
+    Result := 0;
+end;
+
+function get_op4_w5(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+var p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+  if p < pi then
+    Result := sin(p*2)
+  else
+    Result := 0;
+end;
+
+function get_op4_w6(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+var p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+  if p < pi then
+  begin
+    if p < pi * 0.5 then
+      Result := +1 - abs(sin((p+pi)*2 + pi * 0.5))
+    else
+      Result := -1 + abs(sin((p+pi)*2 + pi * 0.5));
+  end
+  else
+    Result := 0;
+
+end;
+
+function get_op4_w7(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+var p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+  if p < pi then
+    Result := abs(sin(p*2))
+  else
+    Result:=0;
+end;
+
+function get_op4_w8(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+var p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+  if p < pi then
+    Result := 1-abs(sin((aPhase+pi)*2+pi*0.5))
+  else
+    Result := 0;
+end;
+
+function get_op8_w7(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double;inline;
+var p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+  if p < pi then
+    Result := +1-abs(cos((0.25*aPhase)*2+pi*0.5))
+  else
+    Result := -1+abs(cos((0.25*aPhase)*2+pi*0.5))
+end;
+
+function get_all1(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+
+end;
+
+function get_all2(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+
+end;
+
+function get_odd1(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+
+end;
+
+function get_odd2(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+
+end;
+
+function get_res1(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+
+end;
+
+function get_res2(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+
+end;
+
+function get_formant(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+//  Result := (Math.cos( pitchPhases[i] ) - 1) * Math.sin(_freqPhase) * 0.5;
+end;
+
+function get_saw_up(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  Result := 1/pi*FMod(aPhase,2*pi)-1;
+end;
+
+function get_saw_down(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  Result := -(1/pi*FMod(aPhase,2*pi)-1);
+
+end;
+
+function get_square(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  if FMod(aPhase,2*pi) > pi then
+    Result := -1
+  else
+    Result := 1;
+end;
+
+function get_triangle(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+var p:Double;
+begin
+  p := FMod(aPhase,2*pi);
+  if p < pi then
+    Result := -1 + (2 / pi) * p
+  else
+    Result := 3 - (2 / pi) * p;
+end;
+
+function get_whitenoise(aPhase:Double; skirt:integer; resonance:Integer; freq:Integer): Double; inline;
+begin
+  Result := (Random * 2)-1
+end;
+
+
+function GetOsc(Waveform:TWaveForm; aPhase: Double): Double;
+var
+  y, y2, y3, y4, p : Double;
+begin
+  p  := FMod(aPhase,2*pi);
+  y  := sin(aPhase);
+  y2 := sin(aPhase*2);
+  y3 := cos(aPhase);
+  y4 := sin((aPhase+pi)*2+pi*0.5);
 
   // use upper two bits to mangle waveform
 
@@ -67,7 +483,9 @@ begin
 //    -1 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────▀▀▀▀▀▀▀▀▀▀▀─────────┼────────
 //      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
 //       0         10        20        30        40        50        60        70        80        90
-    sinus  ,
+   // Sine wave. Only fundamental:
+    Sinus  ,
+    op4_w1: ;
     opl2_w1 : ; // sine
 
 
@@ -95,7 +513,11 @@ begin
 //      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
 //       0         10        20        30        40        50        60        70        80        90
 
+    // Even partials:
+
+    op4_w3,
     opl2_w2 : if y<0 then y := 0; // sine>0
+
 
 //     1 ┼─────────┼─────────┼─▄▄▄▀▄▄▄─┼─────────┼─────────┼─────────┼─────────┼─▄▄▄▀▄▄▄─┼─────────┼────────
 // 0.950 |         |        ▄▀▀       ▀▀▄        |         |         |        ▄▀▀       ▀▀▄        |
@@ -153,9 +575,6 @@ begin
               else if (p > 1.5 * pi) and (p < 2 * pi) then y := 0;
             end;
 
-   // Sine wave. Only fundamental:
-    op4_w1: ;
-
 //     1 ┼─────────┼─────────┼────█────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
 // 0.900 |         |         |  ██ ██  |         |         |         |         |         |         |
 // 0.800 ┼─────────┼─────────┼██─────██┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
@@ -181,38 +600,10 @@ begin
 //       0         10        20        30        40        50        60        70        80        90
 
     // Off partials, somewhat like square wave:
-    op4_w2: if p<pi then
-              y := 1 - abs(y3)
+    op4_w2: if p < pi then
+              y := +1 - abs(y3)
             else
               y := -1 + abs(y3);
-
-
-//     1 ┼─────────┼─────────┼─███████─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.950 |         |        ███       ███        |         |         |         |         |         |
-// 0.900 ┼─────────┼──────██─┼─────────┼─██──────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.850 |         |     █   |         |   █     |         |         |         |         |         |
-// 0.800 ┼─────────┼────█────┼─────────┼────█────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.750 |         |  ██     |         |     ██  |         |         |         |         |         |
-// 0.700 ┼─────────┼─█───────┼─────────┼───────█─┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.650 |         |█        |         |        █|         |         |         |         |         |
-// 0.600 ┼─────────█─────────┼─────────┼─────────█─────────┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.550 |        █|         |         |         |█        |         |         |         |         |
-// 0.500 ┼───────█─┼─────────┼─────────┼─────────┼─█───────┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.450 |      █  |         |         |         |  █      |         |         |         |         |
-// 0.400 ┼─────█───┼─────────┼─────────┼─────────┼───█─────┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.350 |     █   |         |         |         |   █     |         |         |         |         |
-// 0.300 ┼────█────┼─────────┼─────────┼─────────┼────█────┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.250 |   █     |         |         |         |     █   |         |         |         |         |
-// 0.200 ┼──█──────┼─────────┼─────────┼─────────┼──────█──┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.150 | █       |         |         |         |       █ |         |         |         |         |
-// 0.100 ┼─█───────┼─────────┼─────────┼─────────┼───────█─┼─────────┼─────────┼─────────┼─────────┼────────
-// 0.050 |█        |         |         |         |        █|         |         |         |         |
-//     0  ─────────┼─────────┼─────────┼─────────┼─────────█████████████████████████████████████████████████
-//      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
-//       0         10        20        30        40        50        60        70        80        90
-
-    // Even partials:
-    op4_w3: if y<0 then y := 0;
 
 
 //     1 ┼─────────┼─────────┼────█────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────
@@ -375,14 +766,38 @@ begin
 
     // Partials 3,4,5,7,8,11, ... (no 2,6,8,19,...)
 
-    op4_w8: if p < pi then
-              y := 1-abs(y4)
-            else
-              y:=0;
+    op4_w8     : if p < pi then
+                   y := 1-abs(y4)
+                 else
+                   y:=0;
+
+    square     : if p > pi then
+                   y := -1
+                 else
+                   y := 1;
+    triangle   : if p < pi then
+                   y := -1 + (2 / pi) * p
+                 else
+                   y := 3 - (2 / pi) * p;
+
+    saw_up     : y := 1/pi*p-1;
+
+
+    saw_down   : y := -(1/pi*p-1);
+
+    whitenoise : y := (Random * 2)-1
+  else
+    RaiseExceptions();
   end;
 
   Result := y
 end;
+
+
+
+
+
+
 
 
 end.

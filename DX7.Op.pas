@@ -11,34 +11,53 @@ uses
   FM.Oscillator;
 
 type
-  TLiveData=record
-        pan               : Double;
-        outputLevel       : Double;
-        ampL, ampR        : Double;
-        Ratio,
-        freqRatio,
-        freqFixed         : Double;
-        enabled           : boolean;
+  TLiveData = record
+    pan         : Double;
+    outputLevel : Double;
+    ampL, ampR  : Double;
+    Ratio,
+    freqRatio,
+    freqFixed   : Double;
+    enabled     : Boolean;
   end;
 
-  TOperator=record
-  public
-    Params:PVoiceParams;
-    Index:TOperatorIndex;
-    Phase:double;
-    phaseStep:double;
-    Val:double;
-    Envelope:TEnvelopeDX7;
-    OutputLevel:double;
-    LFO:TLfoDX7;
-    pitchEnvelope:TPitchEnvelopeDX7;
-    WaveForm:TWaveform;
-    LiveData:TLiveData;
-    constructor Create(aIndex:TOperatorIndex;const aParams:PVoiceParams; aBaseFrequency:double;aRateScaling:integer);
-    procedure updateFrequency(baseFrequency:double);
-    function render(lMod:double):double;
+{
+{                                                                            }
+{                    Operator                                                }
+{                   ╭─────────────────────────────╮                          }
+{                   │                             │                          }
+{                   │   ┌─┐   ┌─────┐   ┌─────┐   │                          }
+{                   │   │ │──▶│ OSC │──▶│ AMP │──▶▢──▶ wave data ╱╲╱╲╱       }
+{          pitch ──▶▢──▶│ │   └─────┘   └─────┘   │                          }
+{                   │   │+│     sine       ↑      │                          }
+{     modulation ──▶▢──▶│ │             ┌─────┐   │                          }
+{                   │   │ │             │ EG  │   │                          }
+{                   │   └─┘             └─────┘   │                          }
+{                   │                      ↑      │                          }
+{                   ╰──────────────────────▢──────╯                          }
+{                                          ↑                                 }
+{                                      envelope                              }
+{                                       ╱╲___                                }
+{                                      ╱     ╲                               }
+{                                                                            }
+
+  TOperator = record
+    Params       : PVoiceParams;
+    Index        : TOperatorIndex;
+    Phase        : Double;
+    phaseStep    : Double;
+    Val          : Double;
+    Envelope     : TEnvelopeDX7;
+    outputLevel  : Double;
+    LFO          : TLfoDX7;
+    pitchEnvelope: TPitchEnvelopeDX7;
+    WaveForm     : TWaveform;
+    LiveData     : TLiveData;
+    constructor Create(aIndex: TOperatorIndex; const aParams: PVoiceParams; aBaseFrequency: Double; aRateScaling: integer);
+    procedure updateFrequency(aBaseFrequency: Double);
+    function render(aMod:Double): Double;
     procedure noteOff;
-    function isFinished:boolean;
+    function isFinished: Boolean;
   end;
 
 
@@ -46,7 +65,7 @@ implementation
 
 uses Math;
 
-const OUTPUT_LEVEL_TABLE:array[0..99] of double = (
+const OUTPUT_LEVEL_TABLE:array[0..99] of Double = (
 	0.000000, 0.000337, 0.000476, 0.000674, 0.000952, 0.001235, 0.001602, 0.001905, 0.002265, 0.002694,
 	0.003204, 0.003810, 0.004531, 0.005388, 0.006408, 0.007620, 0.008310, 0.009062, 0.010776, 0.011752,
 	0.013975, 0.015240, 0.016619, 0.018123, 0.019764, 0.021552, 0.023503, 0.025630, 0.027950, 0.030480,
@@ -59,69 +78,75 @@ const OUTPUT_LEVEL_TABLE:array[0..99] of double = (
 	6.016799, 6.561366, 7.155220, 7.802823, 8.509039, 9.279172, 10.11901, 11.03486, 12.03360, 13.12273
 );
 
-function mapOutputLevel(input:integer):double;
-var idx :integer;
+function mapOutputLevel(input: integer): Double;
+var
+  idx: integer;
 begin
-	idx := EnsureRange(Input, 0, 99);
-	Result := OUTPUT_LEVEL_TABLE[idx] * 1.27;
-  Assert(Result>=0);
-  Assert(Result<17);
+  idx    := EnsureRange(input, 0, 99);
+  Result := OUTPUT_LEVEL_TABLE[idx] * 1.27;
+  Assert(Result >= 0);
+  Assert(Result < 17);
 end;
 
-constructor TOperator.Create(aIndex:TOperatorIndex;const aParams:PVoiceParams; aBaseFrequency:double;aRateScaling:integer);
+constructor TOperator.Create(aIndex: TOperatorIndex; const aParams: PVoiceParams; aBaseFrequency: Double; aRateScaling: integer);
 begin
-  self.Index := aIndex;
-  self.Params := aParams;
-  self.WaveForm := TWaveForm.sinus;
+  self.Index    := aIndex;
+  self.Params   := aParams;
+  self.WaveForm := TWaveform.Sinus;
 
-	self.phase := 0;
-	self.val := 0;
-	self.envelope := TEnvelopeDX7.Create(Index,Params);
-  self.LFO := TLFOdx7.Create(Index,params);
-	// TODO: Pitch envelope
-	self.pitchEnvelope := TPitchEnvelopeDX7.Create(Params);
-	self.updateFrequency(aBaseFrequency);
+  self.Phase    := 0;
+  self.Val      := 0;
+  self.Envelope := TEnvelopeDX7.Create(Index, Params);
+  self.LFO      := TLfoDX7.Create(Index, Params);
+  // TODO: Pitch envelope
+  self.pitchEnvelope := TPitchEnvelopeDX7.Create(Params);
+  self.updateFrequency(aBaseFrequency);
 
   // Extended/non-standard parameters
   // Alternate panning: -25, 0, 25, -25, 0, 25
-  LiveData.pan  := ((self.Index + 1) mod 3 - 1) * 25;
+  LiveData.pan         := ((self.Index + 1) mod 3 - 1) * 25;
   LiveData.enabled     := True;
   LiveData.outputLevel := mapOutputLevel(aParams.Operators[self.Index].Voiced.LevelScaling.TotalLvl);
 
 end;
 
 
-procedure TOperator.updateFrequency(baseFrequency:double);
-var frequency : double;
-// http://www.chipple.net/dx7/fig09-4.gif
-const OCTAVE_1024 = 1.0006771307; //exp(log(2)/1024);
+procedure TOperator.updateFrequency(aBaseFrequency: Double);
+var
+  frequency: Double;
+const
+  OCTAVE_1024 = 1.0006771307; // exp(log(2)/1024);
 begin
-  if LiveData.freqRatio=0 then
+  if LiveData.freqRatio = 0 then
     LiveData.freqRatio := 0.5;
 
-  if Params.operators[Index].Voiced.Osc.OscMode = TOscModeVoiced.Fixed then
-  	frequency := LiveData.freqFixed
+  if Params.Operators[Index].Voiced.Osc.OscMode = TOscModeVoiced.Fixed then
+    frequency := LiveData.freqFixed
   else
-		frequency := baseFrequency * LiveData.freqRatio * power(OCTAVE_1024, Params.operators[Index].Voiced.Osc.FrDetune - 7); //@@@
+    frequency := aBaseFrequency * LiveData.freqRatio * power(OCTAVE_1024, Params.Operators[Index].Voiced.Osc.FrDetune - 7); // @@@
 
-	self.phaseStep := config.period * frequency / Config.sampleRate; // radians per sample
+  self.phaseStep := Config.period * frequency / Config.sampleRate; // radians per sample
 end;
 
 
-function TOperator.render(lMod:double):double;
-var p,o,env,l,a:double;
-
+function TOperator.render(aMod:Double):Double;
+var
+  vPitchEnv,
+  vOsc,
+  vEnv,
+  vLFO,
+  vAmp:Double;
 begin
-  o   := GetOsc(WaveForm, self.Phase + lMod);
-  env := envelope.render();
-  l   := self.lfo.render();
-  a   := lfo.renderAmp();
-  p   := 1-self.pitchEnvelope.render()*0.0000001;
+  vOsc := WaveFunctions[WaveForm](self.Phase + aMod);
+  vEnv := envelope.render();
+  vLFO := lfo.render();
+  vAmp := lfo.renderAmp();
+  vPitchEnv   := 1-self.pitchEnvelope.render()*0.0000001;
 //  p   := 1;
 
-	self.val := o * env * a;
+	self.val := vOsc * vEnv * vAmp;
 //	self.phase := self.phase + (self.phaseStep * self.lfo.render());
-  self.phase := self.phase + (self.phaseStep * l * p );
+  self.phase := self.phase + (self.phaseStep * vLFO * vPitchEnv );
 	if (self.phase >= config.period) then
 		self.phase := self.phase - config.period;
 
