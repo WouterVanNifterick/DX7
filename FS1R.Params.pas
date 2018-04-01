@@ -8,16 +8,18 @@ uses
   System.StrUtils,
   Generics.Collections,
   Generics.Defaults,
+  System.Hash,
   WvN.Math.Bits;
 
   {$SCOPEDENUMS ON}
 
 type
 
-  TMidiWord=0..127;
-  TSysexVal=0..127;
-  T0_99=0..99;
-  TMidiNote=0..127;
+  TMidiWord = 0..127;
+  TSysexVal = 0..127;
+  T0_99     = 0..99;
+  TMidiNote = 0..127;
+  TReserved = 0..0;
 
   /// <summary>
   /// sine     The operator will generate a sine wave which can be used for additive or FM synthesis.
@@ -37,9 +39,7 @@ const
   Curves:array[TCurve] of string=('-Lin','-exp','+exp','+lin');
 
 type
-  TReserved=0..0;
-
-  TLFODelay =(Onset,Ramp,Complete);
+  TLFODelayStage = (Onset,Ramp,Complete);
 
   TCategory=(
     NoAssign=0,
@@ -78,52 +78,51 @@ type
   );
 
 
-  // From Yamaha Montage data list page 155:
 const
-
-// 39.70 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───────█
-// 38.71 |         |         |         |         |         |         |         |         |         |         |         |         |      ▄█
-// 37.72 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────██
-// 36.72 |         |         |         |         |         |         |         |         |         |         |         |         |      ██
-// 35.73 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────▄██
-// 34.74 |         |         |         |         |         |         |         |         |         |         |         |         |     ███
-// 33.75 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────▄███
-// 32.75 |         |         |         |         |         |         |         |         |         |         |         |         |   ▄████
-// 31.76 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───█████
-// 30.77 |         |         |         |         |         |         |         |         |         |         |         |         |  ██████
-// 29.78 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─▄██████
-// 28.78 |         |         |         |         |         |         |         |         |         |         |         |         | ███████
-// 27.79 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼████████
-// 26.80 |         |         |         |         |         |         |         |         |         |         |         |         █████████
-// 25.81 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────▄█████████
-// 24.81 |         |         |         |         |         |         |         |         |         |         |         |        ██████████
-// 23.82 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───────███████████
-// 22.83 |         |         |         |         |         |         |         |         |         |         |         |      ████████████
-// 21.84 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────▄████████████
-// 20.84 |         |         |         |         |         |         |         |         |         |         |         |     █████████████
-// 19.85 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────██████████████
-// 18.86 |         |         |         |         |         |         |         |         |         |         |         |   ▄██████████████
-// 17.87 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──▄███████████████
-// 16.87 |         |         |         |         |         |         |         |         |         |         |         |▄█████████████████
-// 15.88 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────▄██████████████████
-// 14.89 |         |         |         |         |         |         |         |         |         |         |       ▄████████████████████
-// 13.90 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────▄█████████████████████
-// 12.90 |         |         |         |         |         |         |         |         |         |         |    ▄███████████████████████
-// 11.91 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───▄████████████████████████
-// 10.92 |         |         |         |         |         |         |         |         |         |         | ▄██████████████████████████
-//  9.93 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────▄████████████████████████████
-//  8.93 |         |         |         |         |         |         |         |         |         |      ▄▄██████████████████████████████
-//  7.94 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───▄▄█████████████████████████████████
-//  6.95 |         |         |         |         |         |         |         |         |         |▄▄████████████████████████████████████
-//  5.96 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────▄▄▄███████████████████████████████████████
-//  4.96 |         |         |         |         |         |         |         |         | ▄▄█████████████████████████████████████████████
-//  3.97 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───▄▄▄▄▄██████████████████████████████████████████████████
-//  2.98 |         |         |         |         |         |         ▄▄▄▄▄▄▄▄█████████████████████████████████████████████████████████████
-//  1.99 ┼─────────┼─────────┼─────────┼─────▄▄▄▄▄▄▄▄▄▄▄▄█████████████████████████████████████████████████████████████████████████████████
-//  0.99 |         |  ▄▄▄▄▄▄▄▄▄▄▄▄████████████████████████████████████████████████████████████████████████████████████████████████████████
-//     0 ┼████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-//      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
-//       0         10        20        30        40        50        60        70        80        90        100       110       120
+  // From Yamaha Montage data list page 155:
+  // 39.70 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───────█
+  // 38.71 |         |         |         |         |         |         |         |         |         |         |         |         |      ▄█
+  // 37.72 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────██
+  // 36.72 |         |         |         |         |         |         |         |         |         |         |         |         |      ██
+  // 35.73 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────▄██
+  // 34.74 |         |         |         |         |         |         |         |         |         |         |         |         |     ███
+  // 33.75 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────▄███
+  // 32.75 |         |         |         |         |         |         |         |         |         |         |         |         |   ▄████
+  // 31.76 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───█████
+  // 30.77 |         |         |         |         |         |         |         |         |         |         |         |         |  ██████
+  // 29.78 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─▄██████
+  // 28.78 |         |         |         |         |         |         |         |         |         |         |         |         | ███████
+  // 27.79 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼████████
+  // 26.80 |         |         |         |         |         |         |         |         |         |         |         |         █████████
+  // 25.81 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────▄█████████
+  // 24.81 |         |         |         |         |         |         |         |         |         |         |         |        ██████████
+  // 23.82 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───────███████████
+  // 22.83 |         |         |         |         |         |         |         |         |         |         |         |      ████████████
+  // 21.84 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────▄████████████
+  // 20.84 |         |         |         |         |         |         |         |         |         |         |         |     █████████████
+  // 19.85 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────██████████████
+  // 18.86 |         |         |         |         |         |         |         |         |         |         |         |   ▄██████████████
+  // 17.87 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──▄███████████████
+  // 16.87 |         |         |         |         |         |         |         |         |         |         |         |▄█████████████████
+  // 15.88 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────▄██████████████████
+  // 14.89 |         |         |         |         |         |         |         |         |         |         |       ▄████████████████████
+  // 13.90 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────▄█████████████████████
+  // 12.90 |         |         |         |         |         |         |         |         |         |         |    ▄███████████████████████
+  // 11.91 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───▄████████████████████████
+  // 10.92 |         |         |         |         |         |         |         |         |         |         | ▄██████████████████████████
+  //  9.93 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────▄████████████████████████████
+  //  8.93 |         |         |         |         |         |         |         |         |         |      ▄▄██████████████████████████████
+  //  7.94 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───▄▄█████████████████████████████████
+  //  6.95 |         |         |         |         |         |         |         |         |         |▄▄████████████████████████████████████
+  //  5.96 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────▄▄▄███████████████████████████████████████
+  //  4.96 |         |         |         |         |         |         |         |         | ▄▄█████████████████████████████████████████████
+  //  3.97 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───▄▄▄▄▄██████████████████████████████████████████████████
+  //  2.98 |         |         |         |         |         |         ▄▄▄▄▄▄▄▄█████████████████████████████████████████████████████████████
+  //  1.99 ┼─────────┼─────────┼─────────┼─────▄▄▄▄▄▄▄▄▄▄▄▄█████████████████████████████████████████████████████████████████████████████████
+  //  0.99 |         |  ▄▄▄▄▄▄▄▄▄▄▄▄████████████████████████████████████████████████████████████████████████████████████████████████████████
+  //     0 ┼████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+  //      ─┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────
+  //       0         10        20        30        40        50        60        70        80        90        100       110       120
 
   LFOFrequencies:array[0..127] of single=(
     0.00,0.04,0.08,0.13,0.17,0.21,0.25,0.29,0.34,0.38,0.42,0.46,0.51,0.55,0.59,
@@ -136,6 +135,38 @@ const
     12.8,13.5,14.1,14.8,15.5,16.2,16.8,17.5,18.2,19.5,20.9,22.2,23.6,24.9,26.2,
     27.6,28.9,30.3,31.6,33.0,34.3,37.0,39.7);
 
+  //    50 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────
+  // 48.28 |         |         |         |         |         |         |         |         |         |         |         |         |
+  // 46.55 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────█
+  // 44.83 |         |         |         |         |         |         |         |         |         |         |         |         |   ██
+  // 43.10 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──███
+  // 41.38 |         |         |         |         |         |         |         |         |         |         |         |         |▄████
+  // 39.66 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────▄█████
+  // 37.93 |         |         |         |         |         |         |         |         |         |         |         |        ▄██████
+  // 36.21 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───────▄███████
+  // 34.48 |         |         |         |         |         |         |         |         |         |         |         |      ▄████████
+  // 32.76 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────██████████
+  // 31.03 |         |         |         |         |         |         |         |         |         |         |         |    ███████████
+  // 29.31 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───████████████
+  // 27.59 |         |         |         |         |         |         |         |         |         |         |         |  █████████████
+  // 25.86 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─██████████████
+  // 24.14 |         |         |         |         |         |         |         |         |         |         |         ▄███████████████
+  // 22.41 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────────▄████████████████
+  // 20.69 |         |         |         |         |         |         |         |         |         |         |       ▄█████████████████
+  // 18.97 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────▄██████████████████
+  // 17.24 |         |         |         |         |         |         |         |         |         |         |     ▄███████████████████
+  // 15.52 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼────█████████████████████
+  // 13.79 |         |         |         |         |         |         |         |         |         |         |  ▄██████████████████████
+  // 12.07 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─████████████████████████
+  // 10.34 |         |         |         |         |         |         |         |         |         |    ▄▄▄▄▄▄█████████████████████████
+  //  8.62 ┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼───────████████████████████████████████████████████████
+  //  6.90 |         |         |         |         |         |         |▄▄▄▄▄▄▄▄█████████████████████████████████████████████████████████
+  //  5.17 ┼─────────┼─────────┼─────────┼─────────┼───██████████████████████████████████████████████████████████████████████████████████
+  //  3.45 |         |         |     ▄▄▄▄▄▄▄▄▄███████████████████████████████████████████████████████████████████████████████████████████
+  //  1.72 ┼────────█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+  //     0  █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+  //      ─|─────────|─────────|─────────|─────────|─────────|─────────|─────────|─────────|─────────|─────────|─────────|─────────|──────
+  //       0         10        20        30        40        50        60        70        80        90        100       110       120
   ModulationDelayOffset:array[0..127] of single=(
     0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,
     1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3,3.4,3.5,3.6,3.7,
@@ -217,7 +248,6 @@ Record
   Reserved   : TReserved;  // 01 3F reserved
 End;
 
-// 52 bytes
 TBankNum=(Off,Int,PrA,PrB,PrC,PrD,PrE,PrF,PrG,PrH,PrI,PrJ,PrK);
 TChanMax=(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,Off);
 TRcvChan=(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,prm,Off);
@@ -226,6 +256,7 @@ TMonoPriority=(last, top, bottom, first);
 TFilterSW=(off,&on);
 
 
+// 52 bytes
 TPerformancePartSysex =
 packed record
   NoteReserve   : $00..$20; // 00 NOTE RESERVE 0~32
@@ -279,15 +310,21 @@ packed record
   Reserved      : packed array[0..3] of TReserved; // 30 Reserved
 end;
 
-TLevels=packed array[0..3] of $00..$64;
-TRates =packed array[0..3] of $00..$63;
-TFilterType=(LPF24, LPF18, LPF12, HPF, BPF, BEF);
 
+TLevel=00..$64;
+TRate=00..$63;
+
+// 4 bytes
+TLevels=packed array[0..3] of TLevel;
+TRates =packed array[0..3] of TRate;
+
+// 8 bytes
 TEnvelope=packed record
     Levels:TLevels;
     Rates :TRates;
 end;
 
+TFilterType=(LPF24, LPF18, LPF12, HPF, BPF, BEF);
 TLFOWaveForm=(Triangle,SawDown,SawUp,Square,Sine,SampleHold);
 TLFOPhase=(Phase0=0,Phase90=1,Phase180=2,Phase270=3);
 TLFOKeySync=(off,&on);
@@ -369,8 +406,8 @@ TVoiceCommonSysex = packed record
   /// “0” corresponds to standard pitch.
   /// Each increment corresponds to a semitone.
   /// A setting of “-12”, for example, transposes the pitch down one octave
+  /// Default:24
   /// </remarks>
-  [default(24)]
   NoteShift : $00..$30; // 0..48            // 1E COMMON Note shift (-24-0-+24)
 
   PitchEG:packed record
@@ -421,11 +458,15 @@ TVoiceCommonSysex = packed record
   /// </summary>
   /// <remarks>
   /// The operator to which feedback can be applied in the selected
-  /// algorithm isindicated at the bottom of the display by "FBOP" followed by
+  /// algorithm is indicated at the bottom of the display by "FBOP" followed by
   /// the number of the operator. An indication such as"FB3-5" in the same
   /// location means that feedback is applied from the output of operator 5 to
   /// the input of operator 3."FB—" means that there is no feedback in the
   /// current algorithm
+  /// </remarks>
+  /// <remarks>
+  /// Waveforms can be changed by feeding some of the signal generated by an
+  /// operator back through that operator. This allows you to set the feedback level.
   /// </remarks>
   FeedBack  : $00..$07;                 // 3D COMMON Voiced feedback level
   PitchEGL  : $00..$64;                 // 3E COMMON Pitch EG - level 3
@@ -440,26 +481,26 @@ TVoiceCommonSysex = packed record
   FmDepth   : packed array[0..4] of $00..$7F;  // 4F 00-7F COMMON FM Control Depth 1 (-64~+63)
   Filter    :
   packed record
-    &Type   : TFilterType;              // 54 COMMON Filter Type (LPF24, LPF18, LPF12, HPF, BPF, BEF)
-    Res    : $00..$74;                 // 55 COMMON Filter Resonance (-16~+100)
-    ResVel : $00..$0E;                 // 56 COMMON Filter Resonance Vel Sens (-7~+7)
-    Cutoff : $00..$7F;                 // 57 COMMON Filter Cutoff Frequency
-    EGVel  : $00..$0E;                 // 58 COMMON Filter EG Depth Vel Sens (-7~+7)
-    LFO1Dp : $00..$63;                 // 59 COMMON Filter Cutoff Frequency LFO1 Depth
-    LFO2Dp : $00..$63;                 // 5A COMMON Filter Cutoff Frequency LFO2 Depth
-    KeyScl : $00..$7F;                 // 5B COMMON Filter Cutoff Frq. Key Scale Dpt (-64~+63)
-    KeySp  : $00..$7F;                 // 5C COMMON Filter Cutoff Frequency Key Scale Point
-    InGain : $00..$18;                 // 5D COMMON Filter Input Gain (-12~+12)
+    &Type     : TFilterType;              // 54 COMMON Filter Type (LPF24, LPF18, LPF12, HPF, BPF, BEF)
+    Res       : $00..$74;                 // 55 COMMON Filter Resonance (-16~+100)
+    ResVel    : $00..$0E;                 // 56 COMMON Filter Resonance Vel Sens (-7~+7)
+    Cutoff    : $00..$7F;                 // 57 COMMON Filter Cutoff Frequency
+    EGVel     : $00..$0E;                 // 58 COMMON Filter EG Depth Vel Sens (-7~+7)
+    LFO1Depth : $00..$63;                 // 59 COMMON Filter Cutoff Frequency LFO1 Depth
+    LFO2Depth : $00..$63;                 // 5A COMMON Filter Cutoff Frequency LFO2 Depth
+    KeyScl    : $00..$7F;                 // 5B COMMON Filter Cutoff Frq. Key Scale Dpt (-64~+63)
+    KeySp     : $00..$7F;                 // 5C COMMON Filter Cutoff Frequency Key Scale Point
+    InGain    : $00..$18;                 // 5D COMMON Filter Input Gain (-12~+12)
     Reserved7 : packed array[0..5] of TReserved;  // 5E reserved
-    EGDpt  : $00..$7F;                 // 64 COMMON Filter EG - depth (-64~+63)
-//    FltEGL1   : $00..$64;                 // 65 COMMON Filter EG - level4
-//    FltEGL2   : $00..$64;                 // 66 COMMON Filter EG - level1
-//    FltEGL3   : $00..$64;                 // 67 COMMON Filter EG - level2
-//    FltEGL4   : $00..$64;                 // 68 COMMON Filter EG - level3
-//    FltEGT1   : $00..$63;                 // 69 COMMON Filter EG - time1
-//    FltEGT2   : $00..$63;                 // 6A COMMON Filter EG - time2
-//    FltEGT3   : $00..$63;                 // 6B COMMON Filter EG - time3
-//    FltEGT4   : $00..$63;                 // 6C COMMON Filter EG - time4
+    EGDpt     : $00..$7F;                 // 64 COMMON Filter EG - depth (-64~+63)
+//  FltEGL1   : $00..$64;                 // 65 COMMON Filter EG - level4
+//  FltEGL2   : $00..$64;                 // 66 COMMON Filter EG - level1
+//  FltEGL3   : $00..$64;                 // 67 COMMON Filter EG - level2
+//  FltEGL4   : $00..$64;                 // 68 COMMON Filter EG - level3
+//  FltEGT1   : $00..$63;                 // 69 COMMON Filter EG - time1
+//  FltEGT2   : $00..$63;                 // 6A COMMON Filter EG - time2
+//  FltEGT3   : $00..$63;                 // 6B COMMON Filter EG - time3
+//  FltEGT4   : $00..$63;                 // 6C COMMON Filter EG - time4
     Envelope  : TEnvelope;
     Reserved8 : TReserved;                // 6D reserved
     FltEGAtTm : $00..$7F;                 // 6E 00-07 /00-07 COMMON Filter EG - attack time vel/time scale
@@ -498,12 +539,12 @@ end;
 /// </summary>
 TFreqEG=packed record
   /// <summary>-50 .. 50</summary>
-  IniV  : $00..$64;  // 08 VOICED oscillator frequency EG - initial value
+  IniV  : TLevel;  // 08 VOICED oscillator frequency EG - initial value
   /// <summary>-50 .. 50</summary>
-  AttV  : $00..$64;  // 09 VOICED oscillator frequency EG - attack value
+  AttV  : TLevel;  // 09 VOICED oscillator frequency EG - attack value
 
-  AttT  : $00..$63;  // 0A VOICED oscillator frequency EG - attack time
-  DecT  : $00..$63;  // 0B VOICED oscillator frequency EG - decay time
+  AttT  : TRate;  // 0A VOICED oscillator frequency EG - attack time
+  DecT  : TRate;  // 0B VOICED oscillator frequency EG - decay time
 end;
 
 
@@ -560,8 +601,24 @@ TVoiceVoiced = record
 
       BWBiasSense :byte             ;
 
+      /// <summary>
+      /// Determines the “spectral form” of the selected Operator.
+      /// </summary>
+      /// <remarks>
+      /// sine     The operator will generate a sine wave which can be used for additive or FM synthesis.
+      /// all 1    Broad band — including all harmonics.
+      /// all 2    Narrow band — including all harmonics.
+      /// odd 1    Broad band — odd harmonics only.
+      /// odd 2    Narrow band — odd harmonics only.
+      /// res1     Resonant broad band.
+      /// res 1    Resonant narrow band.
+      /// frmt The operator will function as a formant for formant-shaping synthesis.
+      /// </remarks>
       SpectralForm:TOscSpectralForm ;
 
+      /// <remarks>
+      /// Ratio,Fixed
+      /// </remarks>
       OscMode     :TOscModeVoiced ;
       /// <summary>
       /// This parameter is effective except when the “sine” spectral form
@@ -593,7 +650,19 @@ TVoiceVoiced = record
       FSeqTrack        : TFSeqTrack;
 
       FrRatio          : $00..$63;                 // 06 VOICED oscillator freq. ratio of band spectrum
+
+      /// <summary>
+      /// Sets the Output Pitch of the Operator slightly higher or lower.
+      /// </summary>
+      /// <remarks>
+      /// Even if the same parameter value is set for both “Coarse Tune” and “Fine Tune,”
+      /// the Detune lets you slightly raise or lower the pitch of each Operator,
+      /// allowing you to add an extra dimension to the sound and enhance the
+      /// spatial characteristics.
+      /// </remarks>
       FrDetune         : $00..$1E;                 // 07 VOICED oscillator detune
+
+
       FrEG             : TFreqEG;
     end;
 
@@ -628,26 +697,19 @@ TVoiceVoiced = record
   Reserved    : array[0..2] of TReserved;  // 1C reserved
 
   Sensitivity : packed record
-    FreqBiasSense: byte;
-    PitchModSense: byte;
+    FreqBiasSense: 0..7;
+    vPitchEnv    : 0..7;
 
+    FreqModSense : 0..7;
+    FreqVelSense : 0..7;
 
-    FreqModSense : byte;
-    FreqVelSense : byte;
-
-    /// <summary>
-    /// 0..7
-    /// </summary>
+    /// <summary>0..7</summary>
     AmpModSense  : 0..7;
 
-    /// <summary>
-    /// -7 .. 7
-    /// </summary>
-    AmpVelSense  : 0..7;
+    /// <summary>-7 .. 7</summary>
+    AmpVelSense  : 0..$E;
 
-    /// <summary>
-    /// -7 .. 7
-    /// </summary>
+    /// <summary>-7 .. 7</summary>
     EGBiasSense : 0..$E;                 // 22 VOICED - EG bias sense (-7~7)
   end;
 
@@ -679,7 +741,7 @@ packed record
     LeftCurve : TCurve;                   // 1A VOICED level scaling - left  curve(0:-lin, 1:-exp, 2:+exp, 3:+lin)
     RightCurve: TCurve;                   // 1B VOICED level scaling - right curve(0:-lin, 1:-exp, 2:+exp, 3:+lin)
   end;
-  Reserved    : array[0..2] of TReserved; // 1C reserved
+  Reserved    : packed array[0..2] of TReserved; // 1C reserved
   FrBias_PMS  : $00..$7F;                 // 1F VOICED - freq bias sense/ pitch mod sense     fbs : (-7~7) [-bbbbmmm] (00-0E/00-07)
   FrModS_FVS  : $00..$7F;                 // 20 VOICED - freq mod sense / freq velocity sense fvs : (-7~7) [-fffvvvv] (00-07/00-0E)
   AmpModSense_AmpVelSense : $00..$7F;     // 21 VOICED - amp mod sense  / amp velocity sense   vs : (-7~7) [-aaavvvv] (00-07/00-0E)
@@ -747,7 +809,7 @@ record
 end;
 
 TSysexHeader =
-record
+packed record
   Status   , { $F0 }
   VendorID , { $43 }
   DeviceID , { $00 }
@@ -758,14 +820,20 @@ record
   AddressLo : 0..127;
 end;
 
+TSysexFooter =
+packed record
+  Checksum,
+  Close:0..127
+end;
+
 // 208 bytes
 TPerformanceSysex =
-record
+packed record
   Header   : TSysexHeader;
   Common   : TPerformanceCommonSysex;
   Effect   : TPerformanceEffectSysex;
   Part     : array[0..3] of TPerformancePartSysex;
-  Footer   : Record Checksum, Close:0..127 end;
+  Footer   : TSysexFooter;
 end;
 
 TFS1ROperatorSysex = packed record
@@ -780,19 +848,19 @@ TFS1ROperator = packed record
 end;
 
 
-// 608 bytes
+// 608 bytes + Header+Footer
 PVoiceParamsSysex=^TVoiceParamsSysex;
 TVoiceParamsSysex =
   packed record
     Header    : TSysexHeader;
     Common    : TVoiceCommonSysex;
     Operators : packed array[0..7] of TFS1ROperatorSysex;
-    Footer    : packed record
-                  Checksum,
-                  Close:0..127
-                end;
-end;
+    Footer    : TSysexFooter;
+  end;
 
+function LoadVoiceParamsFromFile(fn:string):TVoiceParamsSysex;
+
+type
 PVoiceParams=^TVoiceParams;
 TVoiceParams =
   record
@@ -815,6 +883,7 @@ TParamsBank=class(TList<TVoiceParams>)
   procedure SortByBankName;
   procedure SortByAlgorithm;
   procedure SortByOpsCount;
+  function IndexOf(const v:TVoiceParams):integer;
 end;
 
 
@@ -825,6 +894,8 @@ procedure WriteVoiceToFile(Voice:TVoiceParamsSysex; FileName:String);
 
 
 implementation
+
+uses System.IOUtils;
 
 function TVoiceParams.GetOpsCount;
 var
@@ -880,6 +951,19 @@ begin
     end
   ))
 end;
+
+function TParamsBank.IndexOf(const v:TVoiceParams):integer;
+var I:integer; c:TVoiceParams;
+begin
+  for I := 0 to Count-1 do
+  begin
+    c := self.Items[I];
+    if CompareMem(@c, @v,SizeOf(v) ) then
+      Exit(I);
+  end;
+  Result := -1;
+end;
+
 
 
 procedure TVoiceParams.SetBankName(const b: string);
@@ -961,8 +1045,8 @@ begin
   Osc.KeySync      := boolean((Sysex.KeySynTransp shr 6) and 1);                 // 00 VOICED oscillator key sync/transpose [-stttttt] (00-01/00-30)
   Osc.Transpose    := sysex.KeySynTransp and $3F;
   Osc.FreqCoarse   := Sysex.FrCoarse;
-  osc.FreqFine     := Sysex.FrFine;
-  osc.FrNoteSc     := Sysex.FrNoteSc;
+  Osc.FreqFine     := Sysex.FrFine;
+  Osc.FrNoteSc     := Sysex.FrNoteSc;
   Osc.BWBiasSense  := Wvn.Math.Bits.GetValue(Osc.BWBiasSense, 3, 4); // 0..0E
   Osc.SpectralForm := TOscSpectralForm( Wvn.Math.Bits.GetValue(Osc.BWBiasSense, 0, 3) ); // 0..7
 
@@ -972,7 +1056,7 @@ begin
   Osc.Skirt        := wvn.Math.Bits.GetValue( sysex.FrModeSkirtTrack,3,3);
   Osc.FSeqTrack    := TFSeqTrack( wvn.Math.Bits.GetValue( sysex.FrModeSkirtTrack,0,3));
 
-  osc.FrRatio := sysex.FrRatio;
+  Osc.FrRatio := sysex.FrRatio;
   Osc.FrDetune := sysex.FrDetune;
 
   Osc.FrEG := sysex.FrEG;
@@ -1054,18 +1138,17 @@ begin
 
     sb.Append(COscModeVoicedStr[op.Voiced.Osc.OscMode]+' ');
 
-//    case op.oscMode of
-//      Coarse: str(op.freqRatio:7:2,f);
-//      Fixed : str(op.freqFixed:7:2,f);
-//    end;
+    case op.Voiced.Osc.OscMode of
+      TOscModeVoiced.Ratio : Format('%.4d', [op.Voiced.Osc.FrRatio]);
+      TOscModeVoiced.Fixed : Format('%.4d', [op.Voiced.Osc.FreqCoarse]);
+    end;
     sb.Append(f); sb.append(' ');
 
     sb.AppendFormat('%s%d ',[
 
-      ifthen(op.Voiced.Osc.FrDetune -7 < 0,'-',
-      ifthen(op.Voiced.Osc.FrDetune     =0,' ','+')),
-
-      abs(op.Voiced.Osc.FrDetune)]);
+      ifthen(op.Voiced.Osc.FrDetune - 7 < 0,'-',
+      ifthen(op.Voiced.Osc.FrDetune - 7 > 0,'+',' ')),
+         abs(op.Voiced.Osc.FrDetune - 7)]);
 
 
      for I := 0 to 3 do
@@ -1103,6 +1186,18 @@ begin
   sb.Append(sLineBreak);
 
   Result := sb.ToString;
+end;
+
+function LoadVoiceParamsFromFile(fn:string):TVoiceParamsSysex;
+var b:TBytes;
+begin
+  b := TFile.ReadAllBytes(fn);
+  case Length(b) of
+    SizeOf(TVoiceParamsSysex) - SizeOf(TSysexHeader) - SizeOf(TSysexFooter):
+      move(b[SizeOf(TSysexHeader)],Result.Common.Name,length(b));
+    SizeOf(TVoiceParamsSysex):
+      move(b[0],Result.Header.Status,SizeOf(TVoiceParamsSysex));
+  end;
 end;
 
 
