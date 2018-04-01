@@ -5,7 +5,6 @@ interface
 uses
   DX7.Config,
   DX7.Voice,
-  Midi,
   FS1R.Params;
 
 type

@@ -3,7 +3,6 @@
 interface
 
 uses
-  Midi,
   DX7.Config,
   FS1R.Params;
 

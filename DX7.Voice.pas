@@ -4,7 +4,6 @@ interface
 
 uses
   SysUtils,
-  Midi,
   DX7.Config,
   FS1R.Params,
   DX7.Op,

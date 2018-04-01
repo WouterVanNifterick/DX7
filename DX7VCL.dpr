@@ -29,7 +29,8 @@ uses
   Midi.MidiOut in 'C:\dev\lib\MidiIO\Midi.MidiOut.pas',
   Midi.MidiPortSelect in 'C:\dev\lib\MidiIO\Midi.MidiPortSelect.pas',
   Midi.MidiScope in 'C:\dev\lib\MidiIO\Midi.MidiScope.pas',
-  Midi.MidiType in 'C:\dev\lib\MidiIO\Midi.MidiType.pas';
+  Midi.MidiType in 'C:\dev\lib\MidiIO\Midi.MidiType.pas',
+  DX7.PitchEnv in 'DX7.PitchEnv.pas';
 
 {$R *.res}
 

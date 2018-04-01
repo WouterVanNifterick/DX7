@@ -8,7 +8,6 @@ uses
   System.StrUtils,
   Generics.Collections,
   Generics.Defaults,
-  Midi,
   WvN.Math.Bits;
 
   {$SCOPEDENUMS ON}
