@@ -23,7 +23,7 @@ uses Math, SysUtils, IoUtils;
 
   // Expects bankData to be a DX7 SYSEX Bulk Data for 32 Voices
 class procedure TSysexDX7.loadBank(const aBankData: TArray<TMidiByte>; aBank:TParamsBank; aBankName:string);
-var i:integer; p:TVoiceParams;
+var i,c,o,ei:integer; p:TVoiceParams; FoundNonZero:Boolean;
 begin
   for i := 0 to (length(aBankData) div 128)-1 do
   begin
@@ -35,13 +35,35 @@ begin
     if p.Common.Algorithm > 32 then
       Exit;
 
-    if string(p.Common.Name).Replace('-','').IsEmpty then
+    for c := 1 to length(p.Common.Name) do
+      if not InRange(Ord(p.Common.Name[c]),32,127) then
+      begin
+        Exit;
+      end;
+
+
+    if string(p.Common.Name).Replace('-','').Trim.IsEmpty then
       Continue;
 
     if p.GetOpsCount = 0 then
       Continue;
 
-    aBank.Add(p)
+
+    FoundNonZero := False;
+    for o := 0 to 7 do
+    begin
+      for ei := 0 to 3 do
+        if p.Operators[o].Voiced.EG.Envelope.Levels[ei] > 0 then
+        begin
+          FoundNonZero := True;
+          Break;
+        end;
+    end;
+    if not FoundNonZero then
+      continue;
+
+    if aBank.IndexOf(p)<0 then
+      aBank.Add(p)
   end;
 end;
 
@@ -130,17 +152,29 @@ begin
     op.Voiced.Osc.OscMode            := TOscModeVoiced(oscData[15] and 1);
     op.Voiced.Osc.FreqCoarse         := oscData[15] shr 1;
     op.Voiced.Osc.freqFine           := oscData[16];
+
+    op.Voiced.Sensitivity.vPitchEnv := voiceData[116] shr 4;
   end;
+
+
+  if voiceData[102] > 99 then Exit(False);
+  if voiceData[103] > 99 then Exit(False);
+  if voiceData[104] > 99 then Exit(False);
+  if voiceData[105] > 99 then Exit(False);
+  if voiceData[106] > 99 then Exit(False);
+  if voiceData[107] > 99 then Exit(False);
+  if voiceData[108] > 99 then Exit(False);
+  if voiceData[109] > 99 then Exit(False);
 
   p.Common.PitchEG.Envelope.Rates[0] := voiceData[102];
   p.Common.PitchEG.Envelope.Rates[1] := voiceData[103];
   p.Common.PitchEG.Envelope.Rates[2] := voiceData[104];
   p.Common.PitchEG.Envelope.Rates[3] := voiceData[105];
 
-  p.Common.PitchEG.Envelope.Rates[0] := voiceData[106];
-  p.Common.PitchEG.Envelope.Rates[1] := voiceData[107];
-  p.Common.PitchEG.Envelope.Rates[2] := voiceData[108];
-  p.Common.PitchEG.Envelope.Rates[3] := voiceData[109];
+  p.Common.PitchEG.Envelope.Levels[0] := voiceData[106];
+  p.Common.PitchEG.Envelope.Levels[1] := voiceData[107];
+  p.Common.PitchEG.Envelope.Levels[2] := voiceData[108];
+  p.Common.PitchEG.Envelope.Levels[3] := voiceData[109];
 
   p.Common.Algorithm                 := voiceData[110];
   p.Common.FeedBack                  := voiceData[111] and 7;
@@ -157,9 +191,10 @@ begin
   p.Common.LFO1.Sync                 := voiceData[116] and 1;
   p.Common.LFO1.Waveform             := TLFOWaveForm( (voiceData[116] shr 1) and 7 );
 
+//  p.Common.LFO1.FMD {PitchModSens}   := voiceData[116] shr 4; @@@
   p.Common.LFO1.FMD {PitchModSens}   := voiceData[116] shr 4;
 
-  p.Common.NoteShift {transpose}     := voiceData[117];
+  p.Common.NoteShift                 := voiceData[117];
 //  p.Common.Name                      := AnsiString(TEncoding.ASCII.GetString(voiceData, 118, 10));
   move(voicedata[118],p.Common.Name[low(p.Common.Name)],10);
   p.controllerModVal        := 0;
