@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<test-results name="C:\Users\Wouter\Documents\Embarcadero\Studio\Projects\DX7\Test\Win32\Debug\FmSynthTest.exe" total="52" errors="0" failures="0" ignored="0" inconclusive="0" not-run="0" skipped="0" invalid="0" date="2018-04-01" time="0.248">
+  <culture-info current-culture="en" current-uiculture="en" />
+  <test-suite type="Assembly" name="FmSynthTest.exe" executed="true" result="Success" success="True" time="0.248" asserts="0">
+    <results>
+        <test-suite type="Namespace" name="Test" executed="true" result="Success" success="True" time="0.248" asserts="0" >
+          <results>
+              <test-suite type="Fixture" name="TOscillatorTest" executed="True" result="Success" success="True" time="0.248" >
+                <results>
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/sinus" executed="True" result="Success" success="True" time="0.002" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/opl2_w1" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/opl2_w2" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/opl2_w3" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/opl2_w4" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/op4_w1" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/op4_w2" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/op4_w3" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/op4_w4" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/op4_w5" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/op4_w6" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/op4_w7" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/op4_w8" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/saw_up" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/saw_down" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/square" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/triangle" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase 0/whitenoise" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/sinus" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/opl2_w1" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/opl2_w2" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/opl2_w3" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/op4_w1" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/op4_w2" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/op4_w3" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/op4_w4" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/op4_w5" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/op4_w6" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/op4_w7" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/op4_w8" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/saw_up" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/saw_down" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/triangle" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase half pi/whitenoise" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/sinus" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/opl2_w1" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/opl2_w2" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/opl2_w3" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/opl2_w4" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/op4_w1" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/op4_w2" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/op4_w3" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/op4_w4" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/op4_w5" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/op4_w6" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/op4_w7" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/op4_w8" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/saw_up" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/saw_down" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/triangle" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestIfWaveShapeIsCorrect.phase pi/whitenoise" executed="True" result="Success" success="True" time="0.000" asserts="0" />
+                  <test-case name="TestPerformanceFunc" executed="True" result="Success" success="True" time="0.226" asserts="0" />
+                </results>
+              </test-suite>
+          </results>
+        </test-suite>
+    </results>
+  </test-suite>
+</test-results>
