@@ -88,6 +88,13 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
+        <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
+        <DCC_Inlining>off</DCC_Inlining>
+        <DCC_OutputDependencies>true</DCC_OutputDependencies>
+        <Manifest_File>(None)</Manifest_File>
+        <DCC_RangeChecking>true</DCC_RangeChecking>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -102,6 +109,30 @@
         </DelphiCompile>
         <DCCReference Include="Test.Oscillator.pas"/>
         <DCCReference Include="..\FM.Oscillator.pas"/>
+        <DCCReference Include="Test.MSFA.LFO.pas"/>
+        <DCCReference Include="..\FS1R.Params.pas"/>
+        <DCCReference Include="..\fm\synthunit.pas"/>
+        <DCCReference Include="..\fm\synth.pas"/>
+        <DCCReference Include="..\fm\sin.pas"/>
+        <DCCReference Include="..\fm\ringbuffer.pas"/>
+        <DCCReference Include="..\fm\PluginFx.pas"/>
+        <DCCReference Include="..\fm\PluginData.pas"/>
+        <DCCReference Include="..\fm\pitchenv.pas"/>
+        <DCCReference Include="..\fm\patch.pas"/>
+        <DCCReference Include="..\fm\lfo.pas"/>
+        <DCCReference Include="..\fm\freqlut.pas"/>
+        <DCCReference Include="..\fm\fm_op_kernel.pas"/>
+        <DCCReference Include="..\fm\fm_core.pas"/>
+        <DCCReference Include="..\fm\exp2.pas"/>
+        <DCCReference Include="..\fm\env.pas"/>
+        <DCCReference Include="..\fm\EngineOpl.pas"/>
+        <DCCReference Include="..\fm\EngineMkI.pas"/>
+        <DCCReference Include="..\fm\dx7note.pas"/>
+        <DCCReference Include="..\fm\dx7.pas"/>
+        <DCCReference Include="..\fm\dexed_ttl.pas"/>
+        <DCCReference Include="..\fm\dexed.pas"/>
+        <DCCReference Include="..\fm\controllers.pas"/>
+        <DCCReference Include="Test.FmOpKernel.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -122,6 +153,10 @@
                 <Source>
                     <Source Name="MainSource">FmSynthTest.dpr</Source>
                 </Source>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k240.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp240.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
                 <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
@@ -150,16 +185,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployClass Name="DependencyModule">
-                    <Platform Name="Win32">
-                        <Operation>0</Operation>
-                        <Extensions>.dll;.bpl</Extensions>
-                    </Platform>
-                    <Platform Name="OSX32">
-                        <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
-                    </Platform>
-                </DeployClass>
+                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
                 <DeployClass Name="ProjectOSXResource">
                     <Platform Name="OSX32">
                         <RemoteDir>Contents\Resources</RemoteDir>
@@ -470,7 +496,16 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
+                <DeployClass Name="DependencyModule">
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.dll;.bpl</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                </DeployClass>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
