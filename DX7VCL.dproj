@@ -95,8 +95,8 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RangeChecking>true</DCC_RangeChecking>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.343;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <VerInfo_Build>343</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.481;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Build>481</VerInfo_Build>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <AppEnableHighDPI>true</AppEnableHighDPI>
@@ -162,6 +162,27 @@
         <DCCReference Include="C:\dev\lib\MidiIO\Midi.MidiScope.pas"/>
         <DCCReference Include="C:\dev\lib\MidiIO\Midi.MidiType.pas"/>
         <DCCReference Include="DX7.PitchEnv.pas"/>
+        <DCCReference Include="fm\sin.pas"/>
+        <DCCReference Include="fm\PluginFx.pas"/>
+        <DCCReference Include="fm\PluginData.pas"/>
+        <DCCReference Include="fm\pitchenv.pas"/>
+        <DCCReference Include="fm\lfo.pas"/>
+        <DCCReference Include="fm\freqlut.pas"/>
+        <DCCReference Include="fm\fm_op_kernel.pas"/>
+        <DCCReference Include="fm\fm_core.pas"/>
+        <DCCReference Include="fm\exp2.pas"/>
+        <DCCReference Include="fm\env.pas"/>
+        <DCCReference Include="fm\EngineOpl.pas"/>
+        <DCCReference Include="fm\EngineMkI.pas"/>
+        <DCCReference Include="fm\dx7note.pas"/>
+        <DCCReference Include="fm\dexed_ttl.pas"/>
+        <DCCReference Include="fm\dexed.pas"/>
+        <DCCReference Include="fm\controllers.pas"/>
+        <DCCReference Include="fm\dx7.pas"/>
+        <DCCReference Include="fm\ringbuffer.pas"/>
+        <DCCReference Include="fm\synthunit.pas"/>
+        <DCCReference Include="fm\synth.pas"/>
+        <DCCReference Include="fm\patch.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -200,12 +221,27 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployClass Name="ProjectiOSDeviceResourceRules">
+                <DeployClass Name="DependencyModule">
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.dll;.bpl</Extensions>
+                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
                     </Platform>
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXResource">
@@ -556,27 +592,12 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <DeployClass Name="DependencyModule">
-                    <Platform Name="Win32">
-                        <Operation>0</Operation>
-                        <Extensions>.dll;.bpl</Extensions>
-                    </Platform>
+                <DeployClass Name="ProjectiOSDeviceResourceRules">
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
-                    </Platform>
-                    <Platform Name="OSX32">
-                        <RemoteDir>Contents\MacOS</RemoteDir>
-                        <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
                     </Platform>
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
-                    </Platform>
-                    <Platform Name="iOSSimulator">
-                        <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
                     </Platform>
                 </DeployClass>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>

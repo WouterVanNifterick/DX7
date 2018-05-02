@@ -30,7 +30,28 @@ uses
   Midi.MidiPortSelect in 'C:\dev\lib\MidiIO\Midi.MidiPortSelect.pas',
   Midi.MidiScope in 'C:\dev\lib\MidiIO\Midi.MidiScope.pas',
   Midi.MidiType in 'C:\dev\lib\MidiIO\Midi.MidiType.pas',
-  DX7.PitchEnv in 'DX7.PitchEnv.pas';
+  DX7.PitchEnv in 'DX7.PitchEnv.pas',
+  sin in 'fm\sin.pas',
+  PluginFx in 'fm\PluginFx.pas',
+  PluginData in 'fm\PluginData.pas',
+  pitchenv in 'fm\pitchenv.pas',
+  lfo in 'fm\lfo.pas',
+  freqlut in 'fm\freqlut.pas',
+  fm_op_kernel in 'fm\fm_op_kernel.pas',
+  fm_core in 'fm\fm_core.pas',
+  exp2 in 'fm\exp2.pas',
+  env in 'fm\env.pas',
+  EngineOpl in 'fm\EngineOpl.pas',
+  EngineMkI in 'fm\EngineMkI.pas',
+  dx7note in 'fm\dx7note.pas',
+  dexed_ttl in 'fm\dexed_ttl.pas',
+  dexed in 'fm\dexed.pas',
+  controllers in 'fm\controllers.pas',
+  dx7 in 'fm\dx7.pas',
+  ringbuffer in 'fm\ringbuffer.pas',
+  synthunit in 'fm\synthunit.pas',
+  synth in 'fm\synth.pas',
+  patch in 'fm\patch.pas';
 
 {$R *.res}
 
