@@ -249,11 +249,19 @@ begin
 end;
 
 
+var
+  IsRendering:Boolean;
+
 function TDX7Synth.render(): double;
 var
   output : double;
   i      : integer;
 begin
+  if IsRendering then
+    Exit;
+
+  IsRendering := True;
+
   if self=nil then
     Exit(0);
 
@@ -266,6 +274,8 @@ begin
       output  := output + voices[i].render;
   end;
   Result := output * PER_VOICE_LEVEL;
+
+  IsRendering := False;
 end;
 
 end.
